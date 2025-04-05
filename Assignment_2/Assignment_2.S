@@ -53,7 +53,7 @@ install_gpio_isr:
     // Get the address of the RAM Vector table using 
     ldr     r0, =(PPB_BASE + M0PLUS_VTOR_OFFSET)               @ Get RAM Vector Table offset
     ldr     r1, [r0]                                           @ copy Table address in register r1
-    ldr     r0, = gpio_isr                                     @ Get the action done by gpio pin 21
+    ldr     r0, =gpio_isr                                     @ Get the action done by gpio pin 21
     // Store the address of GPIO handler to 
     str     r0, [r1, GPIO_ISR_OFFSET]
     
@@ -79,7 +79,7 @@ btns_init:
     pop     {pc}                                               @ restore the link register and return
 
 alarm_set:
-    // Enable the alarm interrupt timer in memory
+    // Enable the alarm interrupt timers in memory
     ldr     r0, =(TIMER_BASE + TIMER_INTE_OFFSET)
     ldr     r1, =0b11                                          @ Enable alarm 0 (bit 0) and 1 (bit 1)
     str     r1, [r0]
@@ -107,26 +107,43 @@ alarm_set:
 alarm_isr:
     push    {lr}
     // Check if inactivity is more than 1s
-    ldr     r1, =end_morse_time
-    ldr     r1, [r1]
-    ldr     r2, =#END_MORSE_CODE
-    cmp     r1, r2
-    ble     store_space
-    movs    r0, #0
-    ldr     r1, =morse_code_buffer 
-    ldr     r2, =current 
-    ldr     r2, [r2]
-    adds    r1, r1, r2
-    strb    r0, [r1]
-    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)              @ Get the vector table for the alarm timer
-    ldr     r1, =1                                             @ Write to clear interrupt
-    str     r1, [r0]
-    ldr     r0, =end_morse
-    bl      printf
+
+    // read current time
+    ldr     r0, =(TIMER_BASE + TIMER_TIMELR_OFFSET)
+    ldr     r0, [r0]                                           @ current time
+
+    // get timestamp of last button event
+    ldr     r1, =last_timestamp
+    ldr     r1, [r1]                                           @ time of last button event
+
+    // get duration
+    subs    r2, r0, r1                                         @ duration = current time - last time
+
+    // check if duration is greater than the threshold to end the morse code and branch if true
+    ldr     r3, =END_MORSE_CODE
+    cmp     r2, r3
+    bgt     handle_end_morse                                   @ if duration > end threshold, branch to the end handler
+
+    // check if duration is greater than the threshold to write a space and branch if true
+    ldr     r3, =SPACE_THRESHOLD
+    cmp     r2, r3
+    bgt     store_space
+
+    // clear the isr but should never reach here if the interrupt is set up properly
+    b       alarm_isr_clear 
+
+handle_end_morse:
+    // add nullterm to buffer
+    movs    r0, #0                                             @ nullterm = 0
+    ldr     r1, =morse_code_buffer                             @ get address of start of buffer
+    ldr     r2, =current
+    ldr     r2, [r2]                                           @ get the current index
+    adds    r1, r1, r2                                         @ add byte index to start of buffer pointer
+    strb    r0, [r1]                                           @ store nullterm
 
 game_over:
     bx      r5
-    b       game_over
+
 store_space:
     movs    r0, #' '
     ldr     r1, =morse_code_buffer 
@@ -135,20 +152,16 @@ store_space:
     adds    r1, r2, r1
     strb    r0, [r1]
     adds    r2, r2, #1
-    ldr     r3, = current 
+    ldr     r3, =current 
     str     r2, [r3]
-alarm_isr_end:
-    // Acknowledge and clear the interrupt 
-    bl      print_morse_code
-    ldr     r0, =(TIMER_BASE + TIMER_TIMELR_OFFSET)
-    ldr     r0, [r0]
-    ldr     r1, =end_morse_time
-    str     r0, [r1]
-    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)              @ Get the vector table for the alarm timer
-    ldr     r1, =1                                             @ Write to clear interrupt
+
+alarm_isr_clear:
+    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
+    ldr     r1, =0b11
     str     r1, [r0]
 
-    bl      alarm_set 
+    // Don't reset the alarms here, they need to be reset when the buttons are pressed
+
     pop     {pc}
 
 // This subroutine should hold the morse code input buffer logic
@@ -227,7 +240,7 @@ store_dot:
 gpio_end:
     // Acknowledge and clear interrupt
     bl      alarm_set
-    bl      print_morse_code
+    // better not to do I/O inside an ISR because it's slow and blocking
     ldr     r0, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET) @ get the vector table address
     ldr     r1, =0b11
     lsls    r1, #22
@@ -237,24 +250,19 @@ gpio_end:
 
 @ Set data alignment
 .global last_timestamp
-.global end_morse_time
 .global morse_code_buffer
 .global current
 .data
+
     .align 4
 morse_code_buffer: .space 1024                                @ create space to check for morse code input
-.data
     .align 4
 current: .word 0                                              @ keep track of current input
-.data  
     .align 4
-end_morse_time: .word 0                                       @ logic for ending morse string if inactivity is there
-.align 4
 dot: .asciz "Make dot"
-.align 4
+    .align 4
 dash: .asciz "Make dash"
-.data
     .align 4
 last_timestamp: .word 0                                       @ Capture last timestamp
-.align 4
+    .align 4
 end_morse: .asciz "Your morse code has completed"
