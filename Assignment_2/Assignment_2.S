@@ -25,6 +25,7 @@
 
 @ Entry point to the ASM portion of the program
 main_asm:
+    mov     r5, r14        ////////////////////////////////////////////// Please do not modify r5
     bl      install_gpio_isr                                   @ Install the GPIO ISR in the RAM Vector
     bl      install_alarm_isr
     bl      btns_init                                          @ Initialise the gpio pin
@@ -122,7 +123,9 @@ alarm_isr:
     str     r1, [r0]
     ldr     r0, =end_morse
     bl      printf
+
 game_over:
+    bx      r5
     b       game_over
 store_space:
     movs    r0, #' '
