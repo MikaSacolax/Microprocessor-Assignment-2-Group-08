@@ -19,7 +19,7 @@ void print_morse_code();
 void main_asm();
 
 // Turn Morse into Latin characters
-char Morse_to_char (char input[5]);
+char Morse_to_char (char input[6]);
 
 // Turn Latin characters into Morse
 char* Char_to_morse (char input);
@@ -141,7 +141,7 @@ void Level_1 (){
             continue;
         }
         else {
-            char input [5] = "     ";
+            char input [6] = "     ";
             int x = 0;
             while (start_index != current)
             {
@@ -215,7 +215,7 @@ char Rand_char(){
 }
 
 
-char Morse_to_char (char input[5]) {
+char Morse_to_char (char input[6]) {
 
     if(strcmp(input, ".-   ")) return 'A';
     if(strcmp(input, "-... ")) return 'B';
@@ -261,32 +261,32 @@ char Morse_to_char (char input[5]) {
 
 char* Char_to_morse (char input) {
 
-    if(input == 'A') return  ".-    ";
-    if(input == 'B') return  "-...  ";
-    if(input == 'C') return  "-.-.  ";
-    if(input == 'D') return  "-..   ";
-    if(input == 'E') return  ".     ";
-    if(input == 'F') return  "..-.  ";
-    if(input == 'G') return  "--.   ";
-    if(input == 'H') return  "....  ";
-    if(input == 'I') return  "..    ";
-    if(input == 'J') return  ".---  ";
-    if(input == 'K') return  "-.-   ";
-    if(input == 'L') return  ".-..  ";
-    if(input == 'M') return  "--    ";
-    if(input == 'N') return  "-.    ";
-    if(input == 'P') return  "---   ";
-    if(input == 'O') return  ".--.  ";
-    if(input == 'Q') return  "--.-  ";
-    if(input == 'R') return  ".-.   ";
-    if(input == 'S') return  "...   ";
-    if(input == 'T') return  "-     ";
-    if(input == 'U') return  "..-   ";
-    if(input == 'V') return  "...-  ";
-    if(input == 'W') return  ".--   ";
-    if(input == 'X') return  "-..-  ";
-    if(input == 'Y') return  "-.--  ";
-    if(input == 'Z') return  "--..  ";
+    if(input == 'A') return  ".-   ";
+    if(input == 'B') return  "-... ";
+    if(input == 'C') return  "-.-. ";
+    if(input == 'D') return  "-..  ";
+    if(input == 'E') return  ".    ";
+    if(input == 'F') return  "..-. ";
+    if(input == 'G') return  "--.  ";
+    if(input == 'H') return  ".... ";
+    if(input == 'I') return  "..   ";
+    if(input == 'J') return  ".--- ";
+    if(input == 'K') return  "-.-  ";
+    if(input == 'L') return  ".-.. ";
+    if(input == 'M') return  "--   ";
+    if(input == 'N') return  "-.   ";
+    if(input == 'P') return  "---  ";
+    if(input == 'O') return  ".--. ";
+    if(input == 'Q') return  "--.- ";
+    if(input == 'R') return  ".-.  ";
+    if(input == 'S') return  "...  ";
+    if(input == 'T') return  "-    ";
+    if(input == 'U') return  "..-  ";
+    if(input == 'V') return  "...- ";
+    if(input == 'W') return  ".--  ";
+    if(input == 'X') return  "-..- ";
+    if(input == 'Y') return  "-.-- ";
+    if(input == 'Z') return  "--.. ";
 
     if(input == '0') return  ".----";
     if(input == '1') return  "..---";
