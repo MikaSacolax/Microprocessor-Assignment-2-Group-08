@@ -290,6 +290,10 @@ gpio_end:
 .global last_timestamp
 .global morse_code_buffer
 .global current
+.global release_timestamp
+.global last_interval
+.global inactivity_state
+.global morse_sequence_complete
 .data
 
     .align 4
