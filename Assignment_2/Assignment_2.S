@@ -19,9 +19,9 @@
 .equ GPIO_BTN_FALL_MSK, 0x00400000                             @ Bit-22 for falling-edge event on GP21
 .equ GPIO_BTN_RISE_MSK, 0x00800000                             @ Bit-23 for rising-edge event on GP21
 
-.equ DOT_DASH_THRESHOLD, 300000                                @ To check if dot or dash is pressed time in ms.
+.equ DOT_DASH_THRESHOLD, 300000                                @ To check if dot or dash is pressed time in microseconds (.3 s)
 .equ SPACE_THRESHOLD, 1000000                                  @ A space is added after 1 second
-.equ END_MORSE_CODE, 2000000
+.equ END_MORSE_CODE, 2000000                                   @ End of morse threshold time in microseconds (2s)
 
 @ Entry point to the ASM portion of the program
 main_asm:
@@ -81,7 +81,7 @@ btns_init:
 alarm_set:
     // Enable the alarm interrupt timer in memory
     ldr     r0, =(TIMER_BASE + TIMER_INTE_OFFSET)
-    ldr     r1, =1
+    ldr     r1, =0b11                                          @ Enable alarm 0 (bit 0) and 1 (bit 1)
     str     r1, [r0]
 
     // Set the duration of the alarm to our Space Threshold
