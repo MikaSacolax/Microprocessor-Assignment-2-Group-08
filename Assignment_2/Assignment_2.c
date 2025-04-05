@@ -70,8 +70,50 @@ void print_morse_code()
  int main() {
     stdio_init_all(); // Initialise all basic IO
     printf("Assignment #2...\n"); // Basic print to console
-    main_asm();
-    printf("AHHHHHHHHHHHH");
+    
+    while (true)
+    {
+        main_asm();
+        int start_index = current;
+
+        if (current - start_index > 6)
+        {
+            printf("Your input is too long");
+            continue;
+        }
+
+        char input [5] = "     ";
+        int x = 0;
+        while (start_index != current)
+        {
+           input[x] = morse_code_buffer[start_index];
+           x = x + 1;
+           start_index = start_index + 1;
+        }
+        switch (Morse_to_char(input))
+        {
+        case '1':
+            Level_1();
+            break;
+        case '2':
+            Level_2();
+            break;
+        case '3':
+            Level_3();
+            break;
+        case '4':
+            Level_4();
+            break;
+        
+        default:
+            printf("Not a valid input, Try Again.");
+            break;
+        }
+
+    }
+    
+
+
     Level_1 ();
     return 0;
 }
@@ -89,10 +131,11 @@ void Level_1 (){
         char character_to_spell = Rand_char();
         printf("Level 1 character: %c  Morse: %s\n",character_to_spell, Char_to_morse(character_to_spell));
 
+        main_asm();
 
         if (current - start_index > 6)
         {
-            printf("Wrong");
+            printf("Wrong, your input does not equal a singular character.");
             Hearts = Hearts - 1;
             iterations = 5;
             continue;
@@ -106,7 +149,9 @@ void Level_1 (){
                x = x + 1;
                start_index = start_index + 1;
             }
-            
+
+            printf("Your inputted character: %c", Morse_to_char(input));
+
             if (strcmp(input, Char_to_morse(character_to_spell)) == 0)
             {
                 printf("Congrats on getting it right");
@@ -210,7 +255,7 @@ char Morse_to_char (char input[5]) {
     if(strcmp(input, "----.")) return '8';
     if(strcmp(input, "-----")) return '9';
 
-    return '0';
+    return '?';
 
 }
 
@@ -254,6 +299,6 @@ char* Char_to_morse (char input) {
     if(input == '8') return  "----.";
     if(input == '9') return  "-----";
 
-    return "    ";
+    return "?????";
 
 }
