@@ -25,13 +25,11 @@
 
 @ Entry point to the ASM portion of the program
 main_asm:
-    mov     r5, r14        ////////////////////////////////////////////// Please do not modify r5
+    mov     r5, lr
     bl      install_gpio_isr                                   @ Install the GPIO ISR in the RAM Vector
     bl      install_alarm_isr
     bl      btns_init                                          @ Initialise the gpio pin
-loop:
-    wfi
-    b       loop                                               @ Infinite loop
+    bx      r5
 
 install_alarm_isr:
     // Get the base address of the interrupts and write to them.
@@ -40,8 +38,8 @@ install_alarm_isr:
     ldr     r2, =alarm_isr
     str     r2, [r1, ALRM_ISR_OFFSET]
 
-    // Reload IRQ0 for timer0
-    ldr     r1, =(1 << 0)
+    // Reload IRQ0 for timer0 and timer1
+    ldr     r1, =0b11                                          @ enable timer IRQ 0 and 1
     ldr     r0, =(PPB_BASE + M0PLUS_NVIC_ICPR_OFFSET)
     str     r1, [r0]
     ldr     r0, =(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET)
@@ -105,69 +103,94 @@ alarm_set:
 // This subroutine handles the space and ending morse code string logic
 .thumb_func
 alarm_isr:
-    push    {lr}
-    // Check if inactivity is more than 1s
+    // convention is to push anything above r3 at the start of a subroutine
+    push    {lr, r4-r7}
 
-    // read current time
-    ldr     r0, =(TIMER_BASE + TIMER_TIMELR_OFFSET)
-    ldr     r0, [r0]                                           @ current time
+    ldr     r4, =(TIMER_BASE + TIMER_INTR_OFFSET)              @ check which interrupt fired
+    ldr     r5, [r4]                                           @ read interrupt status
 
-    // get timestamp of last button event
-    ldr     r1, =last_timestamp
-    ldr     r1, [r1]                                           @ time of last button event
+    // check alarm 1 first (end of sequence)
+    movs    r7, #0b10                                          @ mask for alarm 1 (second LSB)
+    tst     r5, r7                                             @ tst does a bitwise AND and updates flags
+    bne     handle_end_of_sequence_trigger                     @ if non-zero (ie. interrupt happened), go to handler
 
-    // get duration
-    subs    r2, r0, r1                                         @ duration = current time - last time
+check_alarm0:
+    // check Alarm 0 (space)
+    movs    r7, #0b01                                          @ mask for alarm 0 (LSB)
+    tst     r5, r7                                             @ bitwise AND
+    bne     handle_space_trigger                               @ if non-zero (ie. interrupt happened), go to handler
 
-    // check if duration is greater than the threshold to end the morse code and branch if true
-    ldr     r3, =END_MORSE_CODE
-    cmp     r2, r3
-    bgt     handle_end_morse                                   @ if duration > end threshold, branch to the end handler
+// shouldn't reach here if the interrupts are done properly
+no_alarm_handled:
+    b alarm_isr_end
 
-    // check if duration is greater than the threshold to write a space and branch if true
-    ldr     r3, =SPACE_THRESHOLD
-    cmp     r2, r3
-    bgt     store_space
+handle_end_of_sequence_trigger:
+    ldr     r6, =inactivity_state
+    ldr     r6, [r6]
+    cmp     r6, #1                                                 @ only trigger end if space was already detected (state = 1)
+    bne     clear_alarm1                                           @ if state is not 1 just clear the alarm, don't end sequence
 
-    // clear the isr but should never reach here if the interrupt is set up properly
-    b       alarm_isr_clear 
-
-handle_end_morse:
-    // add nullterm to buffer
-    movs    r0, #0                                             @ nullterm = 0
-    ldr     r1, =morse_code_buffer                             @ get address of start of buffer
+    // add nullterm
+    movs    r0, #0
+    ldr     r1, =morse_code_buffer
     ldr     r2, =current
-    ldr     r2, [r2]                                           @ get the current index
-    adds    r1, r1, r2                                         @ add byte index to start of buffer pointer
-    strb    r0, [r1]                                           @ store nullterm
+    ldr     r2, [r2]
+    adds    r1, r1, r2
+    strb    r0, [r1]                                               @ store null terminator (replace)
 
-game_over:
-    bx      r5
+    // set completed flag
+    ldr     r1, =morse_sequence_complete
+    movs    r0, #1
+    str     r0, [r1]
 
-store_space:
+    // reset inactivity state
+    ldr     r1, =inactivity_state
+    movs    r0, #0
+    str     r0, [r1]
+
+    // fall through to clear the flag
+clear_alarm1:
+    movs    r7, #0b10                                              @ mask for alarm 1
+    str     r7, [r4]                                               @ clear alarm interrupt 1 (r4 stores the timer interrupt address)
+    b alarm_isr_end
+
+handle_space_trigger:
+    ldr     r6, =inactivity_state
+    ldr     r7, [r6]                                               @ load the current state
+    cmp     r7, #0                                                 @ state should be 0 before this (idle)
+    bne     clear_alarm0                                           @ if space already stored, just clear
+
+    // store the space character in the buffer
     movs    r0, #' '
-    ldr     r1, =morse_code_buffer 
-    ldr     r2, =current 
+    ldr     r1, =morse_code_buffer
+    ldr     r2, =current
     ldr     r2, [r2]
     adds    r1, r2, r1
     strb    r0, [r1]
+
+    // incrememnt the current index
     adds    r2, r2, #1
-    ldr     r3, =current 
+    ldr     r3, =current
     str     r2, [r3]
 
-alarm_isr_clear:
-    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
-    ldr     r1, =0b11
-    str     r1, [r0]
+    // update the inactivity state to 1 (space detected)
+    movs    r7, #1
+    str     r7, [r6]
 
-    // Don't reset the alarms here, they need to be reset when the buttons are pressed
+    // fall through to clear the alarm flag
+clear_alarm0:
+    movs    r7, #0b01                                              @ bit mask for alarm 0
+    str     r7, [r4]                                               @ clear alarm 0 interrupt by writing 1
+    b       alarm_isr_exit
 
-    pop     {pc}
+alarm_isr_end:
+    pop     {r4-r7}                                                @ restore saved registers
+    pop     {pc}                                                   @ return from interrupt
 
 // This subroutine should hold the morse code input buffer logic
 .thumb_func
 gpio_isr:
-    push    {lr}                                               @ Save link register to stack
+    push    {lr}                                        @ Save link register to stack
 
     // Get the GPIO Vector table address
     ldr     r0, =(IO_BANK0_BASE + IO_BANK0_PROC0_INTS2_OFFSET)
@@ -196,6 +219,11 @@ btn_press:
     ldr     r0, [r0]
     ldr     r2, =last_timestamp
     str     r0, [r2] 
+    ldr     r3, =release_timestamp                             @ get last release time
+    ldr     r3, [r3]
+    subs    r4, r0, r3                                         @ calculate duration
+    ldr     r5, =last_interval                                 
+    str     r4, [r5]                                           @ store the interval
     b       gpio_end
 
 btn_release:
@@ -203,15 +231,19 @@ btn_release:
     ldr     r0, =(TIMER_BASE + TIMER_TIMELR_OFFSET)            @ Get the lower 32 bits of timer
     ldr     r0, [r0]                                           @ This is our current timer
 
+    // store the release timestamp
+    ldr     r1, =release_timestamp
+    str     r0, [r1]                                           @ store current time as the release timestamp
+
     // Compute press duration
     ldr    r2, =last_timestamp 
     ldr    r2, [r2]
     subs   r3, r0, r2                                         @ time pressed = release time - press time
 
     // Logic to check if it is dot or dash
-    ldr    r2, =DOT_DASH_THRESHOLD                            @ check if it is dot or dash
+    ldr    r2, =DOT_DASH_THRESHOLD
     cmp    r3, r2                                             @ check if dot or dash
-    blt    store_dot                                          @ store dash if timer < 300000 ms
+    blt    store_dot                                          @ store dot if timer < threshold
 
 store_dash:
     movs   r2, #'-'                                           @ load dash in resgister r2
@@ -238,6 +270,13 @@ store_dot:
     str    r3, [r4]                                           @ update current in memory
     
 gpio_end:
+    // reset the inactivity state
+    ldr     r6, =inactivity_state
+    movs    r7, #0
+    str     r7, [r6]                                           @ reset inactivity state on any button event
+    ldr     r6, =morse_sequence_complete
+    str     r7, [r6]                                           @ reset sequence complete flag
+
     // Acknowledge and clear interrupt
     bl      alarm_set
     // better not to do I/O inside an ISR because it's slow and blocking
@@ -255,14 +294,16 @@ gpio_end:
 .data
 
     .align 4
-morse_code_buffer: .space 1024                                @ create space to check for morse code input
+morse_code_buffer: .space 1024                                 @ create space to check for morse code input
     .align 4
-current: .word 0                                              @ keep track of current input
+current: .word 0                                               @ keep track of current input
     .align 4
-dot: .asciz "Make dot"
+last_timestamp: .word 0                                        @ Capture last timestamp
     .align 4
-dash: .asciz "Make dash"
+release_timestamp: .word 0                                     @ timestamp of last release of button
     .align 4
-last_timestamp: .word 0                                       @ Capture last timestamp
+last_interval: .word 0                                         @ duration between last release and current pressgpio_isr
     .align 4
-end_morse: .asciz "Your morse code has completed"
+inactivity_state: .word 0                                      @ 0 = idle, 1 = space detected
+    .align 4
+morse_sequence_complete: .word 0                               @ flag for the C code
