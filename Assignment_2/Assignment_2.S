@@ -103,8 +103,7 @@ alarm_set:
 // This subroutine handles the space and ending morse code string logic
 .thumb_func
 alarm_isr:
-    // convention is to push anything above r3 at the start of a subroutine
-    push    {lr, r4-r7}
+    push    {lr, r0-r7}
 
     ldr     r4, =(TIMER_BASE + TIMER_INTR_OFFSET)              @ check which interrupt fired
     ldr     r5, [r4]                                           @ read interrupt status
@@ -181,16 +180,16 @@ handle_space_trigger:
 clear_alarm0:
     movs    r7, #0b01                                              @ bit mask for alarm 0
     str     r7, [r4]                                               @ clear alarm 0 interrupt by writing 1
-    b       alarm_isr_exit
+    b       alarm_isr_end
 
 alarm_isr_end:
-    pop     {r4-r7}                                                @ restore saved registers
+    pop     {r0-r7}                                                @ restore saved registers
     pop     {pc}                                                   @ return from interrupt
 
 // This subroutine should hold the morse code input buffer logic
 .thumb_func
 gpio_isr:
-    push    {lr}                                        @ Save link register to stack
+    push    {r0-r7, lr}                                        @ Save volatile regs and lr, used r4-r7, 
 
     // Get the GPIO Vector table address
     ldr     r0, =(IO_BANK0_BASE + IO_BANK0_PROC0_INTS2_OFFSET)
@@ -285,7 +284,7 @@ gpio_end:
     lsls    r1, #22
     str     r1, [r0]
 
-    pop     {pc}
+    pop     {r0-r7, pc}
 
 @ Set data alignment
 .global last_timestamp
@@ -302,7 +301,7 @@ last_timestamp: .word 0                                        @ Capture last ti
     .align 4
 release_timestamp: .word 0                                     @ timestamp of last release of button
     .align 4
-last_interval: .word 0                                         @ duration between last release and current pressgpio_isr
+last_interval: .word 0                                         @ duration between last release and current press
     .align 4
 inactivity_state: .word 0                                      @ 0 = idle, 1 = space detected
     .align 4
