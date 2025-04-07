@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "pico/time.h"
-
+#include "hardware/sync.h"
 
 // Declare the external variables so the compiler knows they exist:
 extern unsigned char morse_code_buffer[];
@@ -81,7 +81,7 @@ void print_morse_code()
 
         while (flag == 0)
                 {
-                    main_asm();
+                    __wfi();
                 }
         
         printf("\nCurrent: %i, Start_index: %i", current, start_index);
