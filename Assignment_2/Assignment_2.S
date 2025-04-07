@@ -15,6 +15,7 @@
 
 .equ GPIO_ISR_OFFSET, 0x74                                     @ GPIO is int #13 (vector table entry 29)
 .equ ALRM_ISR_OFFSET, 0x40                                     @ Alarm0 is #13 in interrupt vector table
+.equ ALRM1_ISR_OFFSET, 0x44                                    @ Alarm1 is #17 in interrupt vector table
 
 .equ GPIO_BTN_FALL_MSK, 0x00400000                             @ Bit-22 for falling-edge event on GP21
 .equ GPIO_BTN_RISE_MSK, 0x00800000                             @ Bit-23 for rising-edge event on GP21
@@ -27,21 +28,27 @@
 main_asm:
     push    {lr}
     bl      install_gpio_isr                                   @ Install the GPIO ISR in the RAM Vector
-    bl      install_alarm_isr
+    bl      install_alarm_isrs
     bl      btns_init                                          @ Initialise the gpio pin
 loop:
     wfi
     pop     {pc}
 
-install_alarm_isr:
+install_alarm_isrs:
     // Get the base address of the interrupts and write to them.
     ldr     r0, =(PPB_BASE + M0PLUS_VTOR_OFFSET)
-    ldr     r1, [r0] 
+    ldr     r1, [r0]                                           @ load the vector table base address into r1
+
+    // install alarm0 isr (irq0)
     ldr     r2, =alarm_isr
     str     r2, [r1, ALRM_ISR_OFFSET]
 
-    // Reload IRQ0 for timer0
-    ldr     r1, =(1 << 0)
+    // install alarm1 isr (irq1)
+    ldr     r2, =alarm1_isr
+    str     r2, [r1, ALRM1_ISR_OFFSET]
+
+    // nvic setup for irq0 (timer0 alarm0) and irq1 (timer1 alarm1)
+    ldr     r1, =((1 << 0) | (1 << 1))                         @ mask (0b11)
     ldr     r0, =(PPB_BASE + M0PLUS_NVIC_ICPR_OFFSET)
     str     r1, [r0]
     ldr     r0, =(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET)
@@ -81,7 +88,7 @@ btns_init:
 alarm_set:
     // Enable the alarm interrupt timer in memory
     ldr     r0, =(TIMER_BASE + TIMER_INTE_OFFSET)
-    ldr     r1, =1
+    ldr     r1, =0b11                                          @ enable both alarm interrupts
     str     r1, [r0]
 
     // Set the duration of the alarm to our Space Threshold
@@ -102,64 +109,63 @@ alarm_set:
     
     bx     lr 
 
-// This subroutine handles the space and ending morse code string logic
+// ISR for only alarm0, space detection
 .thumb_func
 alarm_isr:
     push    {lr}
-    // Check if inactivity is more than 1s
-    ldr     r1, =end_morse_time
-    ldr     r1, [r1]
-    ldr     r2, =#END_MORSE_CODE
-    cmp     r1, r2
-    ble     store_space
-    movs    r0, #0
+    // we don't have to check inactivity durations anymore because
+    // we've split the logic into two interrupts
+store_space:
+    movs    r1, #' '
+    ldr     r0, =format
+    bl      printf
+    movs    r0, #' '
     ldr     r1, =morse_code_buffer 
     ldr     r2, =current 
     ldr     r2, [r2]
     adds    r1, r1, r2
-    strb    r0, [r1]
-    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)              @ Get the vector table for the alarm timer
-    ldr     r1, =1                                             @ Write to clear interrupt
+    strb    r0, [r1]                                           @ store space in buffer
+
+    adds    r2, r2, #1
+    ldr     r3, =current
+    str     r2, [r3]                                           @ increment current
+
+    // clear only the alarm0 interrupt
+    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
+    ldr     r1, =1                                             @ mask to clear only alarm0
     str     r1, [r0]
+
+    pop     {pc}
+
+// ISR for alarm1, end of sequence detections
+.thumb_func
+alarm1_isr:
+    push    {lr}
+
+    // alarm1 means 2 seconds passed, end the sequence
+    // load the null terminator
+    movs    r0, #0
+    ldr     r1, =morse_code_buffer
+    ldr     r2, =current
+    ldr     r2, [r2]
+    adds    r1, r1, r2
+    strb    r0, [r1]                                           @ null terminate the string in the buffer
+
     ldr     r0, =end_morse
     bl      printf
 
     movs    r0, #1
     ldr     r1, =flag
-    str     r0, [r1]
-    ldr     r0, =dot
-    bl      printf
+    str     r0, [r1]                                           @ set flag to 1 to signal to the C code
 
-game_over:
-    b       alarm_isr_end
-store_space:
-    movs   r1, #' '
-    ldr r0, =format
-    bl     printf
-    movs    r0, #' '
-    ldr     r1, =morse_code_buffer 
-    ldr     r2, =current 
-    ldr     r2, [r2]
-    adds    r1, r2, r1
-    strb    r0, [r1]
-    adds    r2, r2, #1
-    ldr     r3, = current 
-    str     r2, [r3]
-
-    b      alarm_isr_end
-
-alarm_isr_end:
-    // Acknowledge and clear the interrupt 
-    //bl      print_morse_code
-    ldr     r0, =(TIMER_BASE + TIMER_TIMELR_OFFSET)
-    ldr     r0, [r0]
-    ldr     r1, =end_morse_time
-    str     r0, [r1]
-    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)              @ Get the vector table for the alarm timer
-    ldr     r1, =1                                             @ Write to clear interrupt
+    // for cleanup, acknowledge both the alarm interrupt flags
+    ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
+    ldr     r1, =0b11                                          @ mask to clear both alarms
     str     r1, [r0]
 
     pop     {pc}
+
+
 
 // This subroutine should hold the morse code input buffer logic
 .thumb_func
@@ -253,7 +259,6 @@ gpio_end:
 
 @ Set data alignment
 .global last_timestamp
-.global end_morse_time
 .global morse_code_buffer
 .global current
 .global flag
@@ -264,8 +269,6 @@ morse_code_buffer: .space 1024                                @ create space to 
     .align 4
 current: .word 0                                              @ keep track of current input
 .data  
-    .align 4
-end_morse_time: .word 0                                       @ logic for ending morse string if inactivity is there
 .align 4
 dot: .asciz "Make dot"
 .align 4
