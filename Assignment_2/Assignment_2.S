@@ -158,6 +158,14 @@ alarm1_isr:
     ldr     r1, =flag
     str     r0, [r1]                                           @ set flag to 1 to signal to the C code
 
+    ldr     r2, =morse_code_buffer
+    ldr     r3, =start_index
+    ldr     r3, [r3]
+    adds    r3, r2, r3 
+    ldr     r5, =start_index
+    ldr     r4, =0
+    str     r4, [r5]
+
 
     // for cleanup, acknowledge both the alarm interrupt flags
     ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
@@ -217,9 +225,6 @@ btn_release:
 
 store_dash:
     movs   r2, #'-'                                           @ load dash in resgister r2
-    movs   r1, #'-'
-    ldr r0, =format
-    bl     printf
     ldr    r3, =current 
     ldr    r3, [r3]
     ldr    r4, =morse_code_buffer
@@ -233,9 +238,6 @@ store_dash:
 
 store_dot:
     movs   r2, #'.'                                           @ set register r2 to store dot
-    movs   r1, #'.'
-    ldr r0, =format
-    bl     printf
     ldr    r3, =current                                       @ get current pointer
     ldr    r3, [r3]                                           @ get address of current pointer
     ldr    r4, =morse_code_buffer
@@ -248,6 +250,7 @@ store_dot:
 gpio_end:
     // Acknowledge and clear interrupt
     bl      alarm_set
+    bl      print_morse_code
     //bl      print_morse_code
     ldr     r0, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET) @ get the vector table address
     ldr     r1, =0b11
@@ -261,12 +264,16 @@ gpio_end:
 .global morse_code_buffer
 .global current
 .global flag
+.global start_index 
 .data
     .align 4
 morse_code_buffer: .space 1024                                @ create space to check for morse code input
 .data
     .align 4
 current: .word 0                                              @ keep track of current input
+.data
+    .align 4
+start_index: .word 0
 .data  
 .align 4
 dot: .asciz "Make dot"

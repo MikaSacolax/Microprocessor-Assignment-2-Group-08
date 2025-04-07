@@ -12,6 +12,7 @@ extern unsigned char morse_code_buffer[];
 extern uint32_t current;
 extern uint32_t flag;
 extern uint32_t current;
+extern uint32_t start_index;
 
 int Hearts = 3;
 
@@ -76,7 +77,6 @@ void print_morse_code()
     while (true)
     {
         printf("\nMorse code: ");
-        int start_index = current;
         flag = 0;
 
         while (flag == 0)
@@ -93,15 +93,15 @@ void print_morse_code()
             continue;
         }
 
+
         char input [6] = "     ";
         int x = 0;
-        while (x != current)
+        while (start_index <= current)
         {
             input[x] = morse_code_buffer[start_index];
             printf("%c", morse_code_buffer[start_index]);
             x = x + 1;
             start_index = start_index + 1;
-            printf("\n%d", start_index);
         }
 
         printf("%c, %s", Morse_to_char(input), input);
@@ -165,6 +165,7 @@ void Level_1 (){
                input[x] = morse_code_buffer[start_index];
                x = x + 1;
                start_index = start_index + 1;
+               
             }
 
             printf("Your inputted character: %c", Morse_to_char(input));
@@ -234,7 +235,7 @@ char Rand_char(){
 
 char Morse_to_char (char input[6]) {
 
-    if(strcmp(input, ".-   ") == 0) return 'A';
+    if(strcmp(input, ".- ") == 0) return 'A';
     if(strcmp(input, "-... ") == 0) return 'B';
     if(strcmp(input, "-.-. ") == 0) return 'C';
     if(strcmp(input, "-..  ") == 0) return 'D';
