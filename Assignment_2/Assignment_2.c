@@ -11,6 +11,7 @@
 extern unsigned char morse_code_buffer[];
 extern uint32_t current;
 extern uint32_t flag;
+extern uint32_t current;
 
 int Hearts = 3;
 
@@ -72,7 +73,6 @@ void print_morse_code()
     stdio_init_all(); // Initialise all basic IO
     printf("Assignment #2...\n"); // Basic print to console
     
-    main_asm();
     while (true)
     {
         printf("\nMorse code: ");
@@ -95,7 +95,7 @@ void print_morse_code()
 
         char input [6] = "     ";
         int x = 0;
-        while (start_index != current)
+        while (x != current)
         {
             input[x] = morse_code_buffer[start_index];
             printf("%c", morse_code_buffer[start_index]);
