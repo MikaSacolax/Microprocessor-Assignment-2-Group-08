@@ -146,7 +146,7 @@ store_space:
     ldr     r3, = current 
     str     r2, [r3]
 
-    b      gpio_end
+    b      alarm_isr_end
 
 alarm_isr_end:
     // Acknowledge and clear the interrupt 
