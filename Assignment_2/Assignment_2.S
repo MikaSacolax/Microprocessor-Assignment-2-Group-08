@@ -25,12 +25,13 @@
 
 @ Entry point to the ASM portion of the program
 main_asm:
+    push    {lr}
     bl      install_gpio_isr                                   @ Install the GPIO ISR in the RAM Vector
     bl      install_alarm_isr
     bl      btns_init                                          @ Initialise the gpio pin
 loop:
     wfi
-    b       loop                                               @ Infinite loop
+    pop     {pc}
 
 install_alarm_isr:
     // Get the base address of the interrupts and write to them.
@@ -123,7 +124,7 @@ alarm_isr:
     ldr     r0, =end_morse
     bl      printf
 game_over:
-    b       game_over
+    b       alarm_isr_end
 store_space:
     movs    r0, #' '
     ldr     r1, =morse_code_buffer 
@@ -145,7 +146,6 @@ alarm_isr_end:
     ldr     r1, =1                                             @ Write to clear interrupt
     str     r1, [r0]
 
-    bl      alarm_set 
     pop     {pc}
 
 // This subroutine should hold the morse code input buffer logic
