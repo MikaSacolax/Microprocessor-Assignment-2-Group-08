@@ -127,8 +127,6 @@ alarm_isr:
     movs    r0, #1
     ldr     r1, =flag
     str     r0, [r1]
-    ldr     r0, =dot
-    bl      printf
 
 game_over:
     b       alarm_isr_end
@@ -160,6 +158,7 @@ alarm_isr_end:
     str     r1, [r0]
 
     pop     {pc}
+
 
 // This subroutine should hold the morse code input buffer logic
 .thumb_func
