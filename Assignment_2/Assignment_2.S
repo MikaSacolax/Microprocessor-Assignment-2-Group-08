@@ -158,14 +158,13 @@ alarm1_isr:
     ldr     r1, =flag
     str     r0, [r1]                                           @ set flag to 1 to signal to the C code
 
+
     // for cleanup, acknowledge both the alarm interrupt flags
     ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
     ldr     r1, =0b11                                          @ mask to clear both alarms
     str     r1, [r0]
 
     pop     {pc}
-
-
 
 // This subroutine should hold the morse code input buffer logic
 .thumb_func

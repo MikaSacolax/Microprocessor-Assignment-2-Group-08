@@ -71,23 +71,24 @@ void print_morse_code()
  int main() {
     stdio_init_all(); // Initialise all basic IO
     printf("Assignment #2...\n"); // Basic print to console
-    int start_index = current;
+    
     main_asm();
     while (true)
     {
-        printf("Morse code: ");
-        
+        printf("\nMorse code: ");
+        int start_index = current;
+        flag = 0;
+
         while (flag == 0)
                 {
-                    sleep_ms(1);
-                    printf("t");
+                    main_asm();
                 }
-        printf("test");
-        flag = 0;
+        
+        printf("\nCurrent: %i, Start_index: %i", current, start_index);
 
         if (current - start_index > 6)
         {
-            printf("Your input is too long: %i", current - start_index);
+            printf("\nYour input is too long: %i ", current - start_index);
             current = current + 1;
             continue;
         }
@@ -96,17 +97,11 @@ void print_morse_code()
         int x = 0;
         while (start_index != current)
         {
-            if (morse_code_buffer[start_index - 1] == ' ')
-            {
-                start_index = start_index + 1;
-                continue;
-            }
-            
             input[x] = morse_code_buffer[start_index];
             printf("%c", morse_code_buffer[start_index]);
             x = x + 1;
             start_index = start_index + 1;
-
+            printf("\n%d", start_index);
         }
 
         printf("%c, %s", Morse_to_char(input), input);
