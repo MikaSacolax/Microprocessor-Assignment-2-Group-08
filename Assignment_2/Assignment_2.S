@@ -124,9 +124,18 @@ alarm_isr:
     ldr     r0, =end_morse
     bl      printf
 
+    movs    r0, #1
+    ldr     r1, =flag
+    str     r0, [r1]
+    ldr     r0, =dot
+    bl      printf
+
 game_over:
     b       alarm_isr_end
 store_space:
+    movs   r1, #' '
+    ldr r0, =format
+    bl     printf
     movs    r0, #' '
     ldr     r1, =morse_code_buffer 
     ldr     r2, =current 
@@ -136,9 +145,12 @@ store_space:
     adds    r2, r2, #1
     ldr     r3, = current 
     str     r2, [r3]
+
+    b      gpio_end
+
 alarm_isr_end:
     // Acknowledge and clear the interrupt 
-    bl      print_morse_code
+    //bl      print_morse_code
     ldr     r0, =(TIMER_BASE + TIMER_TIMELR_OFFSET)
     ldr     r0, [r0]
     ldr     r1, =end_morse_time
@@ -200,6 +212,9 @@ btn_release:
 
 store_dash:
     movs   r2, #'-'                                           @ load dash in resgister r2
+    movs   r1, #'-'
+    ldr r0, =format
+    bl     printf
     ldr    r3, =current 
     ldr    r3, [r3]
     ldr    r4, =morse_code_buffer
@@ -213,6 +228,9 @@ store_dash:
 
 store_dot:
     movs   r2, #'.'                                           @ set register r2 to store dot
+    movs   r1, #'.'
+    ldr r0, =format
+    bl     printf
     ldr    r3, =current                                       @ get current pointer
     ldr    r3, [r3]                                           @ get address of current pointer
     ldr    r4, =morse_code_buffer
@@ -225,7 +243,7 @@ store_dot:
 gpio_end:
     // Acknowledge and clear interrupt
     bl      alarm_set
-    bl      print_morse_code
+    //bl      print_morse_code
     ldr     r0, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET) @ get the vector table address
     ldr     r1, =0b11
     lsls    r1, #22
@@ -238,6 +256,7 @@ gpio_end:
 .global end_morse_time
 .global morse_code_buffer
 .global current
+.global flag
 .data
     .align 4
 morse_code_buffer: .space 1024                                @ create space to check for morse code input
@@ -255,4 +274,9 @@ dash: .asciz "Make dash"
     .align 4
 last_timestamp: .word 0                                       @ Capture last timestamp
 .align 4
-end_morse: .asciz "Your morse code has completed"
+end_morse: .asciz "\nYour morse code has completed\n"
+.section .data
+format: .asciz "%c"
+.data
+    .align 4
+flag: .word 0                                              @ Flag to signal when c can take over

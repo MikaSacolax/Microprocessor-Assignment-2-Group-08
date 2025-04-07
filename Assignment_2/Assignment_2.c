@@ -10,6 +10,7 @@
 // Declare the external variables so the compiler knows they exist:
 extern unsigned char morse_code_buffer[];
 extern uint32_t current;
+extern uint32_t flag;
 
 int Hearts = 3;
 
@@ -70,26 +71,46 @@ void print_morse_code()
  int main() {
     stdio_init_all(); // Initialise all basic IO
     printf("Assignment #2...\n"); // Basic print to console
-    
+    int start_index = current;
+    main_asm();
     while (true)
     {
-        main_asm();
-        int start_index = current;
+        printf("Morse code: ");
+        
+        while (flag == 0)
+                {
+                    sleep_ms(1);
+                    printf("t");
+                }
+        printf("test");
+        flag = 0;
 
         if (current - start_index > 6)
         {
-            printf("Your input is too long");
+            printf("Your input is too long: %i", current - start_index);
+            current = current + 1;
             continue;
         }
 
-        char input [5] = "     ";
+        char input [6] = "     ";
         int x = 0;
         while (start_index != current)
         {
-           input[x] = morse_code_buffer[start_index];
-           x = x + 1;
-           start_index = start_index + 1;
+            if (morse_code_buffer[start_index - 1] == ' ')
+            {
+                start_index = start_index + 1;
+                continue;
+            }
+            
+            input[x] = morse_code_buffer[start_index];
+            printf("%c", morse_code_buffer[start_index]);
+            x = x + 1;
+            start_index = start_index + 1;
+
         }
+
+        printf("%c, %s", Morse_to_char(input), input);
+
         switch (Morse_to_char(input))
         {
         case '1':
@@ -107,6 +128,7 @@ void print_morse_code()
         
         default:
             printf("Not a valid input, Try Again.");
+            current = current + 1;
             break;
         }
 
@@ -131,7 +153,7 @@ void Level_1 (){
         char character_to_spell = Rand_char();
         printf("Level 1 character: %c  Morse: %s\n",character_to_spell, Char_to_morse(character_to_spell));
 
-        main_asm();
+        //main_asm();
 
         if (current - start_index > 6)
         {
@@ -217,43 +239,43 @@ char Rand_char(){
 
 char Morse_to_char (char input[6]) {
 
-    if(strcmp(input, ".-   ")) return 'A';
-    if(strcmp(input, "-... ")) return 'B';
-    if(strcmp(input, "-.-. ")) return 'C';
-    if(strcmp(input, "-..  ")) return 'D';
-    if(strcmp(input, ".    ")) return 'E';
-    if(strcmp(input, "..-. ")) return 'F';
-    if(strcmp(input, "--.  ")) return 'G';
-    if(strcmp(input, ".... ")) return 'H';
-    if(strcmp(input, "..   ")) return 'I';
-    if(strcmp(input, ".--- ")) return 'J';
-    if(strcmp(input, "-.-  ")) return 'K';
-    if(strcmp(input, ".-.. ")) return 'L';
-    if(strcmp(input, "--   ")) return 'M';
-    if(strcmp(input, "-.   ")) return 'N';
-    if(strcmp(input, "---  ")) return 'O';
-    if(strcmp(input, ".--. ")) return 'P';
-    if(strcmp(input, "--.- ")) return 'Q';
-    if(strcmp(input, ".-.  ")) return 'R';
-    if(strcmp(input, "...  ")) return 'S';
-    if(strcmp(input, "-    ")) return 'T';
-    if(strcmp(input, "..-  ")) return 'U';
-    if(strcmp(input, "...- ")) return 'V';
-    if(strcmp(input, ".--  ")) return 'W';
-    if(strcmp(input, "-..- ")) return 'X';
-    if(strcmp(input, "-.-- ")) return 'Y';
-    if(strcmp(input, "--.. ")) return 'Z';
+    if(strcmp(input, ".-   ") == 0) return 'A';
+    if(strcmp(input, "-... ") == 0) return 'B';
+    if(strcmp(input, "-.-. ") == 0) return 'C';
+    if(strcmp(input, "-..  ") == 0) return 'D';
+    if(strcmp(input, ".    ") == 0) return 'E';
+    if(strcmp(input, "..-. ") == 0) return 'F';
+    if(strcmp(input, "--.  ") == 0) return 'G';
+    if(strcmp(input, ".... ") == 0) return 'H';
+    if(strcmp(input, "..   ") == 0) return 'I';
+    if(strcmp(input, ".--- ") == 0) return 'J';
+    if(strcmp(input, "-.-  ") == 0) return 'K';
+    if(strcmp(input, ".-.. ") == 0) return 'L';
+    if(strcmp(input, "--   ") == 0) return 'M';
+    if(strcmp(input, "-.   ") == 0) return 'N';
+    if(strcmp(input, "---  ") == 0) return 'O';
+    if(strcmp(input, ".--. ") == 0) return 'P';
+    if(strcmp(input, "--.- ") == 0) return 'Q';
+    if(strcmp(input, ".-.  ") == 0) return 'R';
+    if(strcmp(input, "...  ") == 0) return 'S';
+    if(strcmp(input, "-    ") == 0) return 'T';
+    if(strcmp(input, "..-  ") == 0) return 'U';
+    if(strcmp(input, "...- ") == 0) return 'V';
+    if(strcmp(input, ".--  ") == 0) return 'W';
+    if(strcmp(input, "-..- ") == 0) return 'X';
+    if(strcmp(input, "-.-- ") == 0) return 'Y';
+    if(strcmp(input, "--.. ") == 0) return 'Z';
 
-    if(strcmp(input, ".----")) return '0';
-    if(strcmp(input, "..---")) return '1';
-    if(strcmp(input, "...--")) return '2';
-    if(strcmp(input, "....-")) return '3';
-    if(strcmp(input, ".....")) return '4';
-    if(strcmp(input, "-....")) return '5';
-    if(strcmp(input, "--...")) return '6';
-    if(strcmp(input, "---..")) return '7';
-    if(strcmp(input, "----.")) return '8';
-    if(strcmp(input, "-----")) return '9';
+    if(strcmp(input, ".----") == 0) return '0';
+    if(strcmp(input, "..---") == 0) return '1';
+    if(strcmp(input, "...--") == 0) return '2';
+    if(strcmp(input, "....-") == 0) return '3';
+    if(strcmp(input, ".....") == 0) return '4';
+    if(strcmp(input, "-....") == 0) return '5';
+    if(strcmp(input, "--...") == 0) return '6';
+    if(strcmp(input, "---..") == 0) return '7';
+    if(strcmp(input, "----.") == 0) return '8';
+    if(strcmp(input, "-----") == 0) return '9';
 
     return '?';
 
