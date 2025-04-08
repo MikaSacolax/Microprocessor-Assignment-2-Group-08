@@ -1,5 +1,3 @@
-# Generated Cmake Pico project file
-
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
@@ -29,13 +27,14 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
 
 project(Assignment_2 C CXX ASM)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Assignment_2 Assignment_2.c Assignment_2.S)
+add_executable(Assignment_2 src/main.c src/assem.S)
 
 pico_set_program_name(Assignment_2 "Assignment_2")
 pico_set_program_version(Assignment_2 "0.1")
@@ -46,7 +45,11 @@ pico_enable_stdio_usb(Assignment_2 1)
 
 # Add the standard library to the build
 target_link_libraries(Assignment_2
-        pico_stdlib)
+        pico_stdlib
+        hardware_pio
+        hardware_timer
+        hardware_watchdog
+        hardware_clocks)
 
 # Add the standard include files to the build
 target_include_directories(Assignment_2 PRIVATE
