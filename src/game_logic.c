@@ -34,3 +34,45 @@ void display_challenge(const GameContext *context) {
 
   printf("Waiting for your input\n-> ");
 }
+
+void display_player_input(const GameContext *context) {
+  uint32_t current_len;
+  char decoded_char = '?';
+
+  uint32_t ints = save_and_disable_interrupts();
+  current_len = current;
+  restore_interrupts_from_disabled(ints);
+
+  // safe read
+  if (current_len >= MORSE_BUFFER_SIZE) {
+    current_len = MORSE_BUFFER_SIZE - 1;
+    decoded_char = '?';
+
+    printf("Warning - overflow.\n");
+  } else {
+    if (current_len > 0) {
+      decoded_char =
+          from_morse_len((const char *)morse_code_buffer, current_len);
+    } else {
+      decoded_char = ' ';
+    }
+  }
+
+  // make it look non-scrolling
+  clear_screen();
+  printf("===== Level %d =====\n\n", context->current_config.level_number);
+  printf("Target Character:  %c\n", context->target_char);
+  if (context->current_config.show_morse_hint) {
+    printf("Morse Code Hint:   %s\n", context->target_morse);
+  }
+
+  printf("\nYour Input Morse:  [");
+
+  for (uint32_t i = 0; i < current_len; ++i) {
+    putchar(morse_code_buffer[i]);
+  }
+  printf("]\n");
+
+  printf("Decodes To:        [%c]\n", decoded_char);
+  printf("\nInputting...\n");
+}
