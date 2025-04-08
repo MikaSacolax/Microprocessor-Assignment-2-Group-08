@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "display_utils.h"
 #include "morse_utils.h"
 
 // Declare the external variables so the compiler knows they exist:
@@ -54,7 +55,10 @@ void print_morse_code() { printf("Morse code: %s\n", morse_code_buffer); }
  * Main entry point for the code - simply calls the main assembly function.
  */
 int main() {
-  stdio_init_all();             // Initialise all basic IO
+  stdio_init_all(); // Initialise all basic IO
+  sleep_ms(5000);
+  print_main_menu();
+
   printf("Assignment #2...\n"); // Basic print to console
 
   while (true) {

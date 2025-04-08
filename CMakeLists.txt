@@ -34,7 +34,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Assignment_2 src/main.c src/assem.S)
+add_executable(Assignment_2 src/main.c src/assem.S src/morse_utils.h src/morse_utils.c src/display_utils.h src/display_utils.c)
 
 pico_set_program_name(Assignment_2 "Assignment_2")
 pico_set_program_version(Assignment_2 "0.1")
