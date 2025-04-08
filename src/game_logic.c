@@ -2,6 +2,7 @@
 #include "src/display_utils.h"
 #include "src/morse_utils.h"
 #include <hardware/sync.h>
+#include <pico/time.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -79,12 +80,30 @@ void display_player_input(const GameContext *context) {
 
 // use after sequence complete flag is set (since the buffer will be null
 // terminated)
-bool check_answer(GameContext *ctx) {
+bool check_answer(GameContext *context) {
   bool is_correct =
-      (strcmp((const char *)morse_code_buffer, ctx->target_morse) == 0);
+      (strcmp((const char *)morse_code_buffer, context->target_morse) == 0);
 
-  ctx->last_answer_correct = is_correct;
-  ctx->last_input_decoded = from_morse((const char *)morse_code_buffer);
+  context->last_answer_correct = is_correct;
+  context->last_input_decoded = from_morse((const char *)morse_code_buffer);
 
   return is_correct;
+}
+
+void display_result(const GameContext *context) {
+  clear_screen();
+  printf("===== Level %d Result =====\n\n",
+         context->current_config.level_number);
+
+  printf("Target Character: %c (%s)\n", context->target_char,
+         context->target_morse);
+
+  printf("Your Input:       %s -> %c\n", (const char *)morse_code_buffer,
+         context->last_input_decoded);
+
+  printf("\nResult: %s\n",
+         context->last_answer_correct ? "CORRECT!" : "INCORRECT!");
+
+  printf("\nNext challenge in %d seconds...\n", 3);
+  sleep_ms(3000);
 }
