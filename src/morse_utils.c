@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "display_utils.h"
+
 const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'A', ".-"},    {'B', "-..."},  {'C', "-.-."},  {'D', "-.."},
     {'E', "."},     {'F', "..-."},  {'G', "--."},   {'H', "...."},
@@ -89,31 +91,44 @@ void get_morse_input_interactive(char *output_buffer, size_t buffer_size) {
   flush_asm_state();
 
   uint32_t last_displayed_index = 0;
-  uint32_t current_len_local = 0;
+  uint32_t current_len = 0;
 
   while (!sequence_complete_flag) {
+    uint32_t ints = save_and_disable_interrupts();
 
     if (new_char_flag) {
-      uint32_t ints = save_and_disable_interrupts();
-      new_char_flag = 0;
-      current_len_local = current;
-      restore_interrupts_from_disabled(ints);
 
-      while (last_displayed_index < current_len_local) {
+      new_char_flag = 0;
+      current_len = current;
+
+      if (current_len == 1 && morse_code_buffer[0] == ' ') {
+        current = 0;
+        current_len = 0;
+
+        uint32_t now = timer_hw->timelr;
+        uint32_t new_alarm1_time = now + 2000000;
+        timer_hw->alarm[1] = new_alarm1_time;
+        timer_hw->intr = 0b10;
+      }
+
+      while (last_displayed_index < current_len) {
         if (last_displayed_index < MORSE_BUFFER_SIZE) {
           putchar(morse_code_buffer[last_displayed_index]);
         }
         last_displayed_index++;
       }
     }
+    restore_interrupts_from_disabled(ints);
     busy_wait_us(500);
   }
 
   {
+    printf("DEBUGGING: BUFFER IS %s.\n", (const char *)morse_code_buffer);
     uint32_t final_len = 0;
     uint32_t ints = save_and_disable_interrupts();
     sequence_complete_flag = 0;
     final_len = current;
+    printf("DEBUGGING: FINAL LEN is %d", final_len);
 
     if (final_len >= buffer_size) {
       final_len = buffer_size - 1;

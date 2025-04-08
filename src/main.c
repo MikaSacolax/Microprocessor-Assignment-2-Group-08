@@ -130,8 +130,9 @@ void main_menu(GameContext *context) {
       level_select_buffer[i] = '\0';
     char char_equiv = from_morse(level_select_buffer);
     get_morse_input_interactive(level_select_buffer, buffer_size);
+    printf("DEBUGGING: char_equiv is %c", char_equiv);
     if (char_equiv >= '1' && char_equiv <= '5') {
-      context->current_level_index = char_equiv - '0';
+      context->current_level_index = char_equiv - '0' + 1;
       context->current_state = GAME_STATE_START_LEVEL;
       break;
     }
