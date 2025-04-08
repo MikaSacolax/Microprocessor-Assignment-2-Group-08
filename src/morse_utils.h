@@ -7,10 +7,11 @@ typedef struct {
   const char *morse;
 } MorseMap;
 
-#define MORSE_TABLE_SIZE 36
+// better than #define for debugging
+enum { MORSE_TABLE_SIZE = 36 };
 
 // conversion funcs
-char *toMorse(char c);
+const char *toMorse(char c);
 char fromMorse(const char *morse);
 
 #endif
