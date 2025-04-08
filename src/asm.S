@@ -30,8 +30,7 @@ main_asm:
     bl      install_gpio_isr                                   @ Install the GPIO ISR in the RAM Vector
     bl      install_alarm_isrs
     bl      btns_init                                          @ Initialise the gpio pin
-loop:
-    wfi
+
     pop     {pc}
 
 install_alarm_isrs:
@@ -143,13 +142,19 @@ store_space:
 alarm1_isr:
     push    {lr}
 
+    // decrement the index to overwrite the space
+    // bear in mind that if end of sequence occurs and current is 0, all hell will break loose
+    // but I don't think that can happen (it'll either be a space, or )
+    ldr     r2, =current
+    ldr     r2, [r2]
+    subs    r2, r2, #1
+    ldr     r1, =morse_code_buffer
+    adds    r1, r1, r2
+
+
     // alarm1 means 2 seconds passed, end the sequence
     // load the null terminator
     movs    r0, #0
-    ldr     r1, =morse_code_buffer
-    ldr     r2, =current
-    ldr     r2, [r2]
-    adds    r1, r1, r2
     strb    r0, [r1]                                           @ null terminate the string in the buffer
 
     movs    r0, #1

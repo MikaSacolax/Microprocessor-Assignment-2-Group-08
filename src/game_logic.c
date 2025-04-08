@@ -1,6 +1,6 @@
 #include "game_logic.h"
-#include "src/display_utils.h"
-#include "src/morse_utils.h"
+#include "display_utils.h"
+#include "morse_utils.h"
 #include <hardware/sync.h>
 #include <pico/time.h>
 #include <stdio.h>

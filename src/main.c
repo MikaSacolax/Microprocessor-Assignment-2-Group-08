@@ -1,4 +1,5 @@
 #include <hardware/sync.h>
+#include <hardware/timer.h>
 #include <pico/stdio.h>
 #include <pico/time.h>
 #include <stdint.h>
@@ -63,6 +64,11 @@ int main() {
         if (current_len == 1 && morse_code_buffer[0] == ' ') {
           current = 0;
           skip_this_char = true;
+
+          uint32_t now = timer_hw->timelr;
+          uint32_t new_alarm1_time = now + 2000000;
+          timer_hw->alarm[1] = new_alarm1_time;
+          timer_hw->intr = 0b10;
         }
         restore_interrupts_from_disabled(ints);
 
@@ -81,7 +87,7 @@ int main() {
       }
 
       if (game_context.current_state == GAME_STATE_WAITING_INPUT) {
-        __wfi();
+        busy_wait_us(500);
       }
       break;
 
