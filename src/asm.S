@@ -116,9 +116,6 @@ alarm_isr:
     // we don't have to check inactivity durations anymore because
     // we've split the logic into two interrupts
 store_space:
-    movs    r1, #' '
-    ldr     r0, =format
-    bl      printf
     movs    r0, #' '
     ldr     r1, =morse_code_buffer 
     ldr     r2, =current 
@@ -154,9 +151,6 @@ alarm1_isr:
     ldr     r2, [r2]
     adds    r1, r1, r2
     strb    r0, [r1]                                           @ null terminate the string in the buffer
-
-    ldr     r0, =end_morse
-    bl      printf
 
     movs    r0, #1
     ldr     r1, =sequence_complete_flag
@@ -221,9 +215,6 @@ btn_release:
 
 store_dash:
     movs   r2, #'-'                                           @ load dash in resgister r2
-    movs   r1, #'-'
-    ldr    r0, =format
-    bl     printf
     ldr    r3, =current 
     ldr    r3, [r3]
     ldr    r4, =morse_code_buffer
@@ -241,9 +232,6 @@ store_dash:
 
 store_dot:
     movs   r2, #'.'                                           @ set register r2 to store dot
-    movs   r1, #'.'
-    ldr r0, =format
-    bl     printf
     ldr    r3, =current                                       @ get current pointer
     ldr    r3, [r3]                                           @ get address of current pointer
     ldr    r4, =morse_code_buffer
