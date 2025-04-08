@@ -11,7 +11,7 @@ typedef struct {
 enum { MORSE_TABLE_SIZE = 36 };
 
 // conversion funcs
-const char *toMorse(char c);
-char fromMorse(const char *morse);
+const char *to_morse(char c);
+char from_morse(const char *morse);
 
 #endif

@@ -13,7 +13,7 @@ const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'2', "..---"}, {'3', "...--"}, {'4', "....-"}, {'5', "....."},
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."}};
 
-const char *toMorse(char c) {
+const char *to_morse(char c) {
   // make every character a capital letter
   c = toupper((unsigned char)c);
 
@@ -28,7 +28,7 @@ const char *toMorse(char c) {
   return "";
 }
 
-char fromMorse(const char *code) {
+char from_morse(const char *code) {
   for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
     if (strcmp(morseTable[i].morse, code) == 0) {
       return morseTable[i].character;
