@@ -130,6 +130,10 @@ store_space:
     ldr     r3, =current
     str     r2, [r3]                                           @ increment current
 
+    movs    r0, #1
+    ldr     r1, =new_char_flag
+    str     r0, [r1]
+
     // clear only the alarm0 interrupt
     ldr     r0, =(TIMER_BASE + TIMER_INTR_OFFSET)
     ldr     r1, =1                                             @ mask to clear only alarm0
@@ -155,7 +159,7 @@ alarm1_isr:
     bl      printf
 
     movs    r0, #1
-    ldr     r1, =flag
+    ldr     r1, =sequence_complete_flag
     str     r0, [r1]                                           @ set flag to 1 to signal to the C code
 
 
@@ -229,6 +233,10 @@ store_dash:
     ldr    r4, =current 
     str    r3, [r4]
 
+    movs   r0, #1
+    ldr    r1, =new_char_flag
+    str    r0, [r1]
+
     b      gpio_end
 
 store_dot:
@@ -244,6 +252,10 @@ store_dot:
     adds   r3, r3, #1                                         @ update current by one index
     ldr    r4, =current
     str    r3, [r4]                                           @ update current in memory
+
+    movs   r0, #1
+    ldr    r1, =new_char_flag
+    str    r0, [r1]
     
 gpio_end:
     // Acknowledge and clear interrupt
@@ -260,7 +272,8 @@ gpio_end:
 .global last_timestamp
 .global morse_code_buffer
 .global current
-.global flag
+.global sequence_complete_flag
+.global new_char_flag
 .data
     .align 4
 morse_code_buffer: .space 1024                                @ create space to check for morse code input
@@ -268,17 +281,20 @@ morse_code_buffer: .space 1024                                @ create space to 
     .align 4
 current: .word 0                                              @ keep track of current input
 .data  
-.align 4
+    .align 4
 dot: .asciz "Make dot"
-.align 4
+    .align 4
 dash: .asciz "Make dash"
 .data
     .align 4
 last_timestamp: .word 0                                       @ Capture last timestamp
-.align 4
+    .align 4
 end_morse: .asciz "\nYour morse code has completed\n"
 .section .data
 format: .asciz "%c"
 .data
     .align 4
-flag: .word 0                                              @ Flag to signal when c can take over
+sequence_complete_flag: .word 0                                              @ Flag to signal when c can take over
+.data
+    .align 4
+new_char_flag: .word 0
