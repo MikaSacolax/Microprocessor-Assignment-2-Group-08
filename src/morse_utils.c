@@ -89,59 +89,53 @@ void get_morse_input_interactive(char *output_buffer, size_t buffer_size) {
   }
 
   flush_asm_state();
+  output_buffer[0] = '\0';
 
-  uint32_t last_displayed_index = 0;
-  uint32_t current_len = 0;
-
-  while (!sequence_complete_flag) {
+  while (true) {
+    bool sequence_has_completed = false;
+    char char_to_printchar_to_print = '\0';
     uint32_t ints = save_and_disable_interrupts();
-
+    if (sequence_complete_flag) {
+      sequence_has_completed = true;
+      sequence_complete_flag = 0;
+    }
     if (new_char_flag) {
-
       new_char_flag = 0;
-      current_len = current;
 
-      if (current_len == 1 && morse_code_buffer[0] == ' ') {
+      uint32_t asm_current_index = current;
+      if (asm_current_index == 1 && morse_code_buffer[0] == ' ') {
         current = 0;
-        current_len = 0;
-
-        uint32_t now = timer_hw->timelr;
-        uint32_t new_alarm1_time = now + 2000000;
-        timer_hw->alarm[1] = new_alarm1_time;
-        timer_hw->intr = 0b10;
-      }
-
-      while (last_displayed_index < current_len) {
-        if (last_displayed_index < MORSE_BUFFER_SIZE) {
-          putchar(morse_code_buffer[last_displayed_index]);
+      } else if (asm_current_index > 0) {
+        uint32_t added_char_index_in_asm_buf = asm_current_index - 1;
+        if (added_char_index_in_asm_buf < MORSE_BUFFER_SIZE) {
+          char_to_printchar_to_print =
+              (char)morse_code_buffer[added_char_index_in_asm_buf];
         }
-        last_displayed_index++;
       }
     }
+
     restore_interrupts_from_disabled(ints);
+
+    if (char_to_printchar_to_print != '\0') {
+      printf("%c", char_to_printchar_to_print);
+    }
+
+    if (sequence_has_completed) {
+      break;
+    }
     busy_wait_us(500);
   }
-
-  {
-    printf("DEBUGGING: BUFFER IS %s.\n", (const char *)morse_code_buffer);
-    uint32_t final_len = 0;
-    uint32_t ints = save_and_disable_interrupts();
-    sequence_complete_flag = 0;
-    final_len = current;
-    printf("DEBUGGING: FINAL LEN is %d", final_len);
-
-    if (final_len >= buffer_size) {
-      final_len = buffer_size - 1;
-    }
-    if (final_len >= MORSE_BUFFER_SIZE) {
-      final_len = MORSE_BUFFER_SIZE - 1;
-    }
-
-    strncpy(output_buffer, (const char *)morse_code_buffer, final_len);
-    output_buffer[final_len] = '\0';
-
-    restore_interrupts_from_disabled(ints);
-
-    printf("\n");
+  uint32_t final_asm_len = 0;
+  uint32_t ints = save_and_disable_interrupts();
+  final_asm_len = strlen((const char *)morse_code_buffer);
+  restore_interrupts_from_disabled(ints);
+  size_t copy_len = final_asm_len;
+  if (copy_len >= buffer_size) {
+    copy_len = buffer_size - 1;
   }
+
+  ints = save_and_disable_interrupts();
+  strncpy(output_buffer, (const char *)morse_code_buffer, copy_len);
+  restore_interrupts_from_disabled(ints);
+  output_buffer[copy_len] = '\0';
 }

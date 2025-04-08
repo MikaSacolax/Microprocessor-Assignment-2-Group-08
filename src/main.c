@@ -4,6 +4,7 @@
 #include <pico/time.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "display_utils.h"
 #include "game_logic.h"
@@ -122,20 +123,34 @@ int main() {
 
 void main_menu(GameContext *context) {
   print_main_menu();
+
   while (true) {
     flush_asm_state();
     size_t buffer_size = 6;
     char level_select_buffer[buffer_size];
-    for (size_t i = 0; i < buffer_size; i++)
-      level_select_buffer[i] = '\0';
-    char char_equiv = from_morse(level_select_buffer);
+    memset(level_select_buffer, '\0', buffer_size);
+
+    printf("\n                                        Level input: ");
+
     get_morse_input_interactive(level_select_buffer, buffer_size);
-    printf("DEBUGGING: char_equiv is %c", char_equiv);
-    if (char_equiv >= '1' && char_equiv <= '5') {
-      context->current_level_index = char_equiv - '0' + 1;
+
+    char decoded_char = from_morse(level_select_buffer);
+
+    if (decoded_char == '1' || decoded_char == '2') {
+      context->current_level_index = decoded_char - '1';
+
       context->current_state = GAME_STATE_START_LEVEL;
+      printf("\n                                        Selected Level %d. "
+             "Starting "
+             "game!\n\n",
+             context->current_level_index + 1);
+      busy_wait_ms(1000);
       break;
+    } else {
+      printf("\n                                        Invalid level "
+             "selection ('%s' -> "
+             "'%c'). Try again:\n",
+             level_select_buffer, decoded_char);
     }
-    printf("\nInvalid level :( Try again\n");
   }
 }
