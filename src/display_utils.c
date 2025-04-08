@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+extern unsigned char morse_code_buffer[];
+
 // clang-format off
 void print_main_menu() {
     clear_screen();
@@ -36,3 +38,5 @@ void clear_screen() {
   printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
          "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 }
+
+void print_morse_buffer() { printf("%s\n", morse_code_buffer); }

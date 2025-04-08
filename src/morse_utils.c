@@ -1,5 +1,7 @@
 #include "morse_utils.h"
 #include <ctype.h>
+#include <hardware/timer.h>
+#include <stdlib.h>
 #include <string.h>
 
 const MorseMap morseTable[MORSE_TABLE_SIZE] = {
@@ -35,4 +37,15 @@ char from_morse(const char *code) {
     }
   }
   return '?';
+}
+
+char rand_char() {
+  srand(time_us_64());
+  int num = rand() % 36;
+
+  if (num <= 9) {
+    return ('0' + num);
+  } else {
+    return ('A' + num - 9);
+  }
 }
