@@ -14,6 +14,7 @@ typedef struct {
 extern const LevelConfig level_configs[];
 
 typedef enum {
+  GAME_STATE_WAITING_MENU_INPUT,
   GAME_STATE_START_LEVEL,
   GAME_STATE_PRESENT_CHALLENGE,
   GAME_STATE_WAITING_INPUT,

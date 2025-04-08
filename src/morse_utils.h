@@ -31,4 +31,6 @@ void flush_asm_state();
 
 char from_morse_len(const char *morse_segment, size_t len);
 
+void get_morse_input_interactive(char *output_buffer, size_t buffer_size);
+
 #endif

@@ -31,6 +31,11 @@ void print_main_menu() {
     printf("                               |                   Shaan • Marco • Mika • Ashlin                      |\n");
     printf("                               |                                                                      |\n");
     printf("                               -----------------------------------------------------------------------\n\n\n\n\n");
+
+    printf("                              USE GP21 BUTTON TO ENTER THE MORSE SEQUENCE FOR THE LEVEL NUMBER TO BEGIN\n\n");
+    printf("                                          .-\tLEVEL 01\tCHARS (EASY)\n");
+    printf("                                          ..-\tLEVEL 02\tCHARS (HARD)\n");
+    centre_display();
 }
 // clang-format on
 

@@ -22,19 +22,16 @@ const uint32_t NUM_LEVELS = 2;
 void main_asm();
 
 // function declarations
-void main_menu();
+void main_menu(GameContext *context);
 
 int main() {
   stdio_init_all(); // Initialise all basic IO
   sleep_ms(5000);   // time to allow serial monitor connection
 
   main_asm();
-  main_menu();
-  sleep_ms(2000);
 
   GameContext game_context;
-  game_context.current_state = GAME_STATE_START_LEVEL;
-  game_context.current_level_index = 0; // start at level 1 (index 0)
+  main_menu(&game_context);
 
   while (true) {
     switch (game_context.current_state) {
@@ -123,4 +120,21 @@ int main() {
   return 0;
 }
 
-void main_menu() { print_main_menu(); }
+void main_menu(GameContext *context) {
+  print_main_menu();
+  while (true) {
+    flush_asm_state();
+    size_t buffer_size = 6;
+    char level_select_buffer[buffer_size];
+    for (size_t i = 0; i < buffer_size; i++)
+      level_select_buffer[i] = '\0';
+    char char_equiv = from_morse(level_select_buffer);
+    get_morse_input_interactive(level_select_buffer, buffer_size);
+    if (char_equiv >= '1' && char_equiv <= '5') {
+      context->current_level_index = char_equiv - '0';
+      context->current_state = GAME_STATE_START_LEVEL;
+      break;
+    }
+    printf("\nInvalid level :( Try again\n");
+  }
+}
