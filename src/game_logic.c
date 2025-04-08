@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
+const LevelConfig level_configs[] = {
+    {.level_number = 1, .show_morse_hint = true},
+    {.level_number = 2, .show_morse_hint = false}};
+
 void setup_level(GameContext *context, int level_index) {
   context->current_level_index = level_index;
   context->current_config = level_configs[level_index];

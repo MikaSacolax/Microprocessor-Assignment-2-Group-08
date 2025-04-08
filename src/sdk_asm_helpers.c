@@ -3,6 +3,8 @@
 #include <pico/stdlib.h>
 #include <pico/time.h>
 
+#include "sdk_asm_helpers.h"
+
 // Initialise a GPIO pin – see SDK for detail on gpio_init()
 void asm_gpio_init(uint pin) { gpio_init(pin); }
 

@@ -11,11 +11,7 @@ typedef struct {
 
 } LevelConfig;
 
-const LevelConfig level_configs[] = {
-    {.level_number = 1, .show_morse_hint = true},
-    {.level_number = 2, .show_morse_hint = false}};
-
-const int NUM_LEVELS = sizeof(level_configs) / sizeof(level_configs[0]);
+extern const LevelConfig level_configs[];
 
 typedef enum {
   GAME_STATE_START_LEVEL,
@@ -38,5 +34,8 @@ typedef struct {
 void setup_level(GameContext *context, int level_index);
 void generate_challenge(GameContext *context);
 void display_challenge(const GameContext *context);
+void display_player_input(const GameContext *context);
+bool check_answer(GameContext *context);
+void display_result(const GameContext *context);
 
 #endif
