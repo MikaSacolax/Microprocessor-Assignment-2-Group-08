@@ -143,11 +143,16 @@ alarm1_isr:
     push    {lr}
 
     // decrement the index to overwrite the space
-    // bear in mind that if end of sequence occurs and current is 0, all hell will break loose
-    // but I don't think that can happen (it'll either be a space, or )
     ldr     r2, =current
     ldr     r2, [r2]
+
+    // check if index is 0 before decrementing it
+    cmp     r2, #0
+    beq     skip_decrement                                     @ skip decrementing if index is 0
+
     subs    r2, r2, #1
+
+skip_decrement:
     ldr     r1, =morse_code_buffer
     adds    r1, r1, r2
 

@@ -37,6 +37,9 @@ void display_challenge(const GameContext *context) {
     printf("Morse Code Hint:   %s\n", context->target_morse);
   }
 
+  printf("\nYour Input Morse:  []");
+  printf("Decodes To:        []\n");
+
   printf("Waiting for your input\n-> ");
 }
 
