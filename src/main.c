@@ -7,9 +7,6 @@
 #include "display_utils.h"
 #include "sdk_asm_helpers.c"
 
-// globals
-const uint32_t MORSE_BUFFER_SIZE = 1024;
-
 // declare the external variables so the compiler knows they exist:
 extern volatile unsigned char morse_code_buffer[];
 extern volatile uint32_t current;
