@@ -10,7 +10,8 @@ typedef struct {
 } MorseMap;
 
 // better than #define for debugging
-const uint32_t MORSE_TABLE_SIZE = 36;
+// can be used for array size as opposed to standard types
+enum { MORSE_TABLE_SIZE = 36 };
 
 // conversion funcs
 const char *to_morse(char c);

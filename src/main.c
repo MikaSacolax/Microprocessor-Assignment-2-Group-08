@@ -1,11 +1,8 @@
 #include <pico/stdio.h>
 #include <pico/time.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "display_utils.h"
-#include "morse_utils.h"
 
 // globals
 const uint32_t MORSE_BUFFER_SIZE = 1024;
