@@ -104,6 +104,8 @@ int main() {
         // just going to cycle through level 1 and 2 for now
         game_context.current_level_index =
             game_context.current_level_index == 0 ? 1 : 0;
+        game_context.current_config =
+            level_configs[game_context.current_level_index];
       }
 
       generate_challenge(&game_context);
