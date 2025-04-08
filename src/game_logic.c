@@ -76,3 +76,15 @@ void display_player_input(const GameContext *context) {
   printf("Decodes To:        [%c]\n", decoded_char);
   printf("\nInputting...\n");
 }
+
+// use after sequence complete flag is set (since the buffer will be null
+// terminated)
+bool check_answer(GameContext *ctx) {
+  bool is_correct =
+      (strcmp((const char *)morse_code_buffer, ctx->target_morse) == 0);
+
+  ctx->last_answer_correct = is_correct;
+  ctx->last_input_decoded = from_morse((const char *)morse_code_buffer);
+
+  return is_correct;
+}
