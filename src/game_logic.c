@@ -14,7 +14,6 @@ void setup_level(GameContext *context, int level_index) {
   context->current_level_index = level_index;
   context->current_config = level_configs[level_index];
   context->current_state = GAME_STATE_PRESENT_CHALLENGE;
-  printf("\n--- Starting Level %d ---\n", context->current_config.level_number);
   generate_challenge(context);
 }
 
@@ -25,22 +24,25 @@ void generate_challenge(GameContext *context) {
     context->target_char = rand_char();
     context->target_morse = to_morse(context->target_char);
   }
-  printf("New challenge generated.\n"); // for debug purposes
 }
 
 void display_challenge(const GameContext *context) {
   clear_screen();
-  printf("===== Level %d =====\n\n", context->current_config.level_number);
-  printf("Target Character:  %c\n", context->target_char);
+  printf(
+      "============================================================== Level %d "
+      "==============================================================\n\n",
+      context->current_config.level_number);
+  printf("\t\t\t\t\t\t\tTarget Character:  %c\n", context->target_char);
 
   if (context->current_config.show_morse_hint) {
-    printf("Morse Code Hint:   %s\n", context->target_morse);
+    printf("\t\t\t\t\t\t\tMorse Code Hint:   %s\n", context->target_morse);
   }
 
-  printf("\nYour Input Morse:  []");
-  printf("Decodes To:        []\n");
+  printf("\n\t\t\t\t\t\t\tYour Input Morse:  []\n");
+  printf("\t\t\t\t\t\t\tDecodes To:        []\n");
 
-  printf("Waiting for your input\n-> ");
+  printf("\t\t\t\t\t\t\tWaiting for your input...\n");
+  centre_display();
 }
 
 void display_player_input(const GameContext *context) {
@@ -56,7 +58,7 @@ void display_player_input(const GameContext *context) {
     current_len = MORSE_BUFFER_SIZE - 1;
     decoded_char = '?';
 
-    printf("Warning - overflow.\n");
+    printf("\t\t\t\t\t\t\tWarning - overflow.\n");
   } else {
     if (current_len > 0) {
       decoded_char =
@@ -68,21 +70,25 @@ void display_player_input(const GameContext *context) {
 
   // make it look non-scrolling
   clear_screen();
-  printf("===== Level %d =====\n\n", context->current_config.level_number);
-  printf("Target Character:  %c\n", context->target_char);
+  printf(
+      "============================================================== Level %d "
+      "==============================================================\n\n",
+      context->current_config.level_number);
+  printf("\t\t\t\t\t\t\tTarget Character:  %c\n", context->target_char);
   if (context->current_config.show_morse_hint) {
-    printf("Morse Code Hint:   %s\n", context->target_morse);
+    printf("\t\t\t\t\t\t\tMorse Code Hint:   %s\n", context->target_morse);
   }
 
-  printf("\nYour Input Morse:  [");
+  printf("\n\t\t\t\t\t\t\tYour Input Morse:  [");
 
   for (uint32_t i = 0; i < current_len; ++i) {
     putchar(morse_code_buffer[i]);
   }
   printf("]\n");
 
-  printf("Decodes To:        [%c]\n", decoded_char);
-  printf("\nInputting...\n");
+  printf("\t\t\t\t\t\t\tDecodes To:        [%c]\n", decoded_char);
+  printf("\n\t\t\t\t\t\t\tInputting...\n");
+  centre_display();
 }
 
 // use after sequence complete flag is set (since the buffer will be null
@@ -99,18 +105,21 @@ bool check_answer(GameContext *context) {
 
 void display_result(const GameContext *context) {
   clear_screen();
-  printf("===== Level %d Result =====\n\n",
+  printf("============================================================== Level "
+         "%d Result "
+         "==============================================================\n\n",
          context->current_config.level_number);
 
-  printf("Target Character: %c (%s)\n", context->target_char,
+  printf("\t\t\t\t\t\t\tTarget Character: %c (%s)\n", context->target_char,
          context->target_morse);
 
-  printf("Your Input:       %s -> %c\n", (const char *)morse_code_buffer,
-         context->last_input_decoded);
+  printf("\t\t\t\t\t\t\tYour Input:       %s -> %c\n",
+         (const char *)morse_code_buffer, context->last_input_decoded);
 
-  printf("\nResult: %s\n",
+  printf("\t\t\t\t\t\t\tResult: %s\n",
          context->last_answer_correct ? "CORRECT!" : "INCORRECT!");
 
-  printf("\nNext challenge in %d seconds...\n", 3);
-  sleep_ms(3000);
+  printf("\n\t\t\t\t\t\t\tNext challenge in %d seconds...\n", 3);
+  centre_display();
+  busy_wait_ms(3000);
 }

@@ -3,5 +3,6 @@
 
 void print_main_menu();
 void clear_screen();
+void centre_display();
 
 #endif

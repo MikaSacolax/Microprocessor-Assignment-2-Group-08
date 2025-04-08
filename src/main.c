@@ -104,8 +104,6 @@ int main() {
         // just going to cycle through level 1 and 2 for now
         game_context.current_level_index =
             game_context.current_level_index == 0 ? 1 : 0;
-        printf("Next level...\n");
-        sleep_ms(2000);
       }
 
       generate_challenge(&game_context);

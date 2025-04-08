@@ -40,3 +40,5 @@ void clear_screen() {
 }
 
 void print_morse_buffer() { printf("%s\n", morse_code_buffer); }
+
+void centre_display() { printf("\n\n\n\n\n\n\n\n"); }
