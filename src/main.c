@@ -18,6 +18,7 @@ extern volatile uint32_t sequence_complete_flag;
 extern volatile uint32_t new_char_flag;
 
 const uint32_t NUM_LEVELS = 2;
+uint32_t loops_for_level = 5;
 
 // Declare the main assembly code entry point.
 void main_asm();
@@ -100,10 +101,28 @@ int main() {
       if (game_context.last_answer_correct) {
         // plenty of scope for change here
         // just going to cycle through level 1 and 2 for now
-        game_context.current_level_index =
-            game_context.current_level_index == 0 ? 1 : 0;
-        game_context.current_config =
-            level_configs[game_context.current_level_index];
+
+        if (loops_for_level == 0) {
+          if (game_context.current_level_index == 4) {
+            printf("------------ Place Holder ------------"); //------------ Place Holder ------------
+          }
+          else {
+            game_context.current_level_index = game_context.current_level_index + 1;
+            game_context.current_config = level_configs[game_context.current_level_index];
+          }
+
+          // Life and colour logic
+
+        }
+        else {
+          loops_for_level = loops_for_level - 1;
+          // Life and colour logic
+        }
+      }
+      else {
+        // Last answer was wrong
+        loops_for_level = 5;
+        // Life and colour logic
       }
 
       generate_challenge(&game_context);
