@@ -1,0 +1,7 @@
+---
+Checks: "clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*"
+WarningsAsErrors: true
+HeaderFilterRegex: ".*"
+HeaderFileExtensions: ["h"]
+ImplementationFileExtensions: ["c"]
+FormatStyle: file
