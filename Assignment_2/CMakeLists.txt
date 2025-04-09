@@ -1,3 +1,4 @@
+# CMakeLists.txt
 # Generated Cmake Pico project file
 
 cmake_minimum_required(VERSION 3.13)
@@ -9,20 +10,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
 
-# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
-if(WIN32)
-    set(USERHOME $ENV{USERPROFILE})
-else()
-    set(USERHOME $ENV{HOME})
-endif()
-set(sdkVersion 2.1.1)
-set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.1.1)
-set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
-    include(${picoVscode})
-endif()
-# ====================================================================================
 set(PICO_BOARD pico CACHE STRING "Board type")
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
@@ -34,8 +21,7 @@ project(Assignment_2 C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-
-add_executable(Assignment_2 Assignment_2.c Assignment_2.S)
+add_executable(Assignment_2 Assignment_2.c Assignment_2.S watchdog_timer.c)
 
 pico_set_program_name(Assignment_2 "Assignment_2")
 pico_set_program_version(Assignment_2 "0.1")
@@ -54,4 +40,3 @@ target_include_directories(Assignment_2 PRIVATE
 )
 
 pico_add_extra_outputs(Assignment_2)
-
