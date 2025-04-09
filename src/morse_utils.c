@@ -19,6 +19,13 @@ const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'2', "..---"}, {'3', "...--"}, {'4', "....-"}, {'5', "....."},
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."}};
 
+char word_list[20][100] = {"sketch",	"mouth",	"index",	"shout",	"fade",	"incident",	"experience",	"retirement",	"penetrate",	"producer",	"uncertainty",	"policy",	"assault",	"mushroom",	
+  "extension",	"egg",	"strange",	"looting",	"organ",	"guitar",	"diagram",	"serve",	"requirement",	"offer",	"survival",	"nonsense",	"clean",	"colorful",	"operational",	"highway",	"tube",	
+  "fresh",	"lift",	"main",	"aisle",	"opinion",	"victory",	"keep",	"see",	"experienced",	"overeat",	"export",	"spot",	"payment",	"particle",	"potential",	"satisfied",	"trick",	"possession",	
+  "stun",	"prestige",	"opinion",	"harass",	"housewife",	"registration",	"bottom",	"rest",	"fine",	"coverage",	"seasonal",	"astonishing",	"sea",	"ritual",	"understanding",	"habit",	"bear",	
+  "switch",	"grandfather",	"knot",	"boat",	"monk",	"tiptoe",	"disgrace",	"freight",	"unlike",	"pudding",	"nationalist",	"floor",	"assault",	"indoor",	"discipline",	"loud",	"legislation",	"skate",	
+  "dream",	"lunch",	"linen",	"west",	"training",	"trap",	"total",	"know",	"cruelty",	"electronics",	"view",	"factor",	"perforate",	"extort",	"integrity",	"brainstorm"};
+
 const char *to_morse(char c) {
   // make every character a capital letter
   c = toupper((unsigned char)c);
