@@ -61,6 +61,8 @@ const char *to_morse(char c) {
 }
 
 char from_morse(const char *code) {
+  if (!code)
+    return '?';
   for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
     if (strcmp(morseTable[i].morse, code) == 0) {
       return morseTable[i].character;
@@ -80,8 +82,19 @@ char *word_to_morse(const char *word, char *output_buffer, size_t buffer_size) {
 
   for (size_t i = 0; word[i] != '\0'; ++i) {
     const char *morse_char = to_morse(word[i]);
+    if (!morse_char || morse_char[0] == '\0')
+      continue; // skip unknown characters
+
     size_t morse_char_len = strlen(morse_char);
-    size_t space_len = first_char ? 0 : 1;
+    size_t space_len =
+        first_char ? 0 : 1; // space needed before non-first chars
+
+    // buffer length check before adding
+    if (current_len + space_len + morse_char_len + 1 > buffer_size) {
+      fprintf(stderr, "Error: word_to_morse buffer overflow.\n");
+      output_buffer[current_len] = '\0';
+      return output_buffer;
+    }
 
     if (!first_char) {
       strcat(output_buffer, " ");
@@ -90,15 +103,13 @@ char *word_to_morse(const char *word, char *output_buffer, size_t buffer_size) {
 
     strcat(output_buffer, morse_char);
     current_len += morse_char_len;
-
-    first_char = false; // everything after the first character should get a
-                        // space prefix (other than the last, will get to this)
+    first_char = false;
   }
-  // output_buffer is already null-terminated by strcat
 
   return output_buffer;
 }
 
+// decodes a space separated morse string into characters
 void decode_morse_word(const char *morse_input, char *output_buffer,
                        size_t buffer_size) {
   if (!morse_input || !output_buffer || buffer_size == 0) {
@@ -141,89 +152,4 @@ const char *rand_challenge(GameContext *context) {
     int num = rand() % WORD_LIST_COUNT;
     return word_list[num];
   }
-}
-
-void flush_asm_state() {
-  uint32_t ints = save_and_disable_interrupts();
-  for (uint32_t i = 0; i < MORSE_BUFFER_SIZE; i++) {
-    morse_code_buffer[i] = '\0';
-  }
-  current = 0;
-
-  sequence_complete_flag = 0;
-  new_char_flag = 0;
-
-  restore_interrupts_from_disabled(ints);
-}
-
-char from_morse_len(const char *morse_segment, size_t len) {
-  if (len == 0 || morse_segment == NULL) {
-    return '?';
-  }
-
-  for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
-    if (strlen(morseTable[i].morse) == len) {
-      // strncmp is safe because it won't read past len bytes
-      if (strncmp(morseTable[i].morse, morse_segment, len) == 0) {
-        return morseTable[i].character;
-      }
-    }
-  }
-  return '?';
-}
-
-void get_morse_input_interactive(char *output_buffer, size_t buffer_size) {
-  if (output_buffer == NULL || buffer_size == 0) {
-    return;
-  }
-
-  flush_asm_state();
-  output_buffer[0] = '\0';
-
-  while (true) {
-    bool sequence_has_completed = false;
-    char char_to_print = '\0';
-    uint32_t ints = save_and_disable_interrupts();
-    if (sequence_complete_flag) {
-      sequence_has_completed = true;
-      sequence_complete_flag = 0;
-    }
-    if (new_char_flag) {
-      new_char_flag = 0;
-
-      uint32_t asm_current_index = current;
-      if (asm_current_index == 1 && morse_code_buffer[0] == ' ') {
-        current = 0;
-      } else if (asm_current_index > 0) {
-        uint32_t added_char_index_in_asm_buf = asm_current_index - 1;
-        if (added_char_index_in_asm_buf < MORSE_BUFFER_SIZE) {
-          char_to_print = (char)morse_code_buffer[added_char_index_in_asm_buf];
-        }
-      }
-    }
-
-    restore_interrupts_from_disabled(ints);
-
-    if (char_to_print != '\0') {
-      printf("%c", char_to_print);
-    }
-
-    if (sequence_has_completed) {
-      break;
-    }
-    busy_wait_us(500);
-  }
-  uint32_t final_asm_len = 0;
-  uint32_t ints = save_and_disable_interrupts();
-  final_asm_len = strlen((const char *)morse_code_buffer);
-  restore_interrupts_from_disabled(ints);
-  size_t copy_len = final_asm_len;
-  if (copy_len >= buffer_size) {
-    copy_len = buffer_size - 1;
-  }
-
-  ints = save_and_disable_interrupts();
-  strncpy(output_buffer, (const char *)morse_code_buffer, copy_len);
-  restore_interrupts_from_disabled(ints);
-  output_buffer[copy_len] = '\0';
 }
