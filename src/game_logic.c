@@ -13,6 +13,7 @@ const LevelConfig level_configs[] = {
     {.level_number = 4, .show_morse_hint = false}};
 
 const uint32_t NUM_LEVELS = sizeof(level_configs) / sizeof(level_configs[0]);
+const uint32_t MAX_LEVEL_INDEX = NUM_LEVELS - 1;
 
 void setup_level(GameContext *context, int level_index) {
   context->current_level_index = level_index;

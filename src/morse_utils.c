@@ -1,12 +1,11 @@
 #include "morse_utils.h"
+#include "game_logic.h"
 #include <ctype.h>
 #include <hardware/sync.h>
 #include <hardware/timer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "display_utils.h"
 
 const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'A', ".-"},    {'B', "-..."},  {'C', "-.-."},  {'D', "-.."},

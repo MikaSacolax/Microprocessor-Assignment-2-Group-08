@@ -1,7 +1,6 @@
 #ifndef MORSE_UTILS_H
 #define MORSE_UTILS_H
 
-#include "game_logic.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -10,6 +9,8 @@ extern volatile uint32_t current;
 extern volatile uint32_t sequence_complete_flag;
 extern volatile uint32_t new_char_flag;
 const uint32_t WORD_LIST_COUNT = 100;
+
+typedef struct GameContext GameContext;
 
 // structure to hold a character and morse representation for easy lookups
 typedef struct {

@@ -14,6 +14,7 @@ typedef struct {
 
 extern const LevelConfig level_configs[];
 extern const uint32_t NUM_LEVELS;
+extern const uint32_t MAX_LEVEL_INDEX;
 
 typedef enum {
   GAME_STATE_WAITING_MENU_INPUT,
@@ -24,7 +25,7 @@ typedef enum {
   GAME_STATE_SHOW_RESULT
 } GameState;
 
-typedef struct {
+typedef struct GameContext {
   GameState current_state;
   int current_level_index;
   LevelConfig current_config;
