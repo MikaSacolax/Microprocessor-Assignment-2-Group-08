@@ -18,9 +18,9 @@ bool asm_interface_is_sequence_complete() {
 
 bool asm_interface_has_new_char() {
   uint32_t ints = save_and_disable_interrupts();
-  bool new_char = (new_char != 0);
+  bool has_new = (new_char_flag != 0);
   restore_interrupts_from_disabled(ints);
-  return new_char;
+  return has_new;
 }
 
 void asm_interface_clear_sequence_complete_flag() {
