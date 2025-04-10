@@ -12,6 +12,8 @@ const LevelConfig level_configs[] = {
     {.level_number = 3, .show_morse_hint = true},
     {.level_number = 4, .show_morse_hint = false}};
 
+const uint32_t NUM_LEVELS = sizeof(level_configs) / sizeof(level_configs[0]);
+
 void setup_level(GameContext *context, int level_index) {
   context->current_level_index = level_index;
   context->current_config = level_configs[level_index];
@@ -20,12 +22,10 @@ void setup_level(GameContext *context, int level_index) {
 }
 
 void generate_challenge(GameContext *context) {
-  context->target_char = rand_char();
-  context->target_morse = to_morse(context->target_char);
-  while (strlen(context->target_morse) == 0) {
-    context->target_char = rand_char();
-    context->target_morse = to_morse(context->target_char);
-  }
+  context->target_challenge = rand_challenge(context);
+  word_to_morse(context->target_challenge, context->target_morse_buffer,
+                MORSE_BUFFER_SIZE);
+  context->target_morse = context->target_morse_buffer;
 }
 
 void display_challenge(const GameContext *context) {
@@ -35,10 +35,10 @@ void display_challenge(const GameContext *context) {
       "==============================================================\n\n",
       context->current_config.level_number);
 
-  if (context->current_level_index == 1 || context->current_level_index == 2) {
-    printf("\t\t\t\t\t\t\tTarget Character:  %s\n", context->target_char);
+  if (context->current_level_index < 2) {
+    printf("\t\t\t\t\t\t\tTarget Character: %s\n", context->target_challenge);
   } else {
-    printf("\t\t\t\t\t\t\tTarget Word:  %s\n", context->target_char);
+    printf("\t\t\t\t\t\t\tTarget Word:      %s\n", context->target_challenge);
   }
 
   if (context->current_config.show_morse_hint) {
@@ -54,24 +54,26 @@ void display_challenge(const GameContext *context) {
 
 void display_player_input(const GameContext *context) {
   uint32_t current_len;
-  char decoded_char = '?';
+  char decoded_input_buffer[MORSE_BUFFER_SIZE];
+  decoded_input_buffer[0] = '\0';
 
   uint32_t ints = save_and_disable_interrupts();
   current_len = current;
+  char safe_morse_buffer[MORSE_BUFFER_SIZE];
+  strncpy(safe_morse_buffer, (const char *)morse_code_buffer, current_len);
+  safe_morse_buffer[current_len] = '\0';
   restore_interrupts_from_disabled(ints);
 
-  // safe read
   if (current_len >= MORSE_BUFFER_SIZE) {
     current_len = MORSE_BUFFER_SIZE - 1;
-    decoded_char = '?';
-
-    printf("\t\t\t\t\t\t\tWarning - overflow.\n");
+    decoded_input_buffer[MORSE_BUFFER_SIZE - 1] = '\0';
+    printf("\t\t\t\t\t\t\tWarning - input buffer overflow.\n");
   } else {
     if (current_len > 0) {
-      decoded_char =
-          from_morse_len((const char *)morse_code_buffer, current_len);
+      decode_morse_word(safe_morse_buffer, decoded_input_buffer,
+                        MORSE_BUFFER_SIZE);
     } else {
-      decoded_char = ' ';
+      strcpy(decoded_input_buffer, " ");
     }
   }
 
@@ -82,10 +84,10 @@ void display_player_input(const GameContext *context) {
       "==============================================================\n\n",
       context->current_config.level_number);
 
-  if (context->current_level_index == 1 || context->current_level_index == 2) {
-    printf("\t\t\t\t\t\t\tTarget Character:  %s\n", context->target_char);
+  if (context->current_level_index < 2) {
+    printf("\t\t\t\t\t\t\tTarget Character: %s\n", context->target_challenge);
   } else {
-    printf("\t\t\t\t\t\t\tTarget Word:  %s\n", context->target_char);
+    printf("\t\t\t\t\t\t\tTarget Word:      %s\n", context->target_challenge);
   }
 
   if (context->current_config.show_morse_hint) {
@@ -94,12 +96,10 @@ void display_player_input(const GameContext *context) {
 
   printf("\n\t\t\t\t\t\t\tYour Input Morse:  [");
 
-  for (uint32_t i = 0; i < current_len; ++i) {
-    putchar(morse_code_buffer[i]);
-  }
+  printf("%s", safe_morse_buffer);
   printf("]\n");
 
-  printf("\t\t\t\t\t\t\tDecodes To:        [%s]\n", decoded_char);
+  printf("\t\t\t\t\t\t\tDecodes To:       [%s]\n", decoded_input_buffer);
   printf("\n\t\t\t\t\t\t\tInputting...\n");
   centre_display();
 }
@@ -107,11 +107,18 @@ void display_player_input(const GameContext *context) {
 // use after sequence complete flag is set (since the buffer will be null
 // terminated)
 bool check_answer(GameContext *context) {
-  bool is_correct =
-      (strcmp((const char *)morse_code_buffer, context->target_morse) == 0);
+  char final_input_morse[MORSE_BUFFER_SIZE];
+  uint32_t ints = save_and_disable_interrupts();
+  strncpy(final_input_morse, (const char *)morse_code_buffer,
+          MORSE_BUFFER_SIZE - 1);
+  final_input_morse[MORSE_BUFFER_SIZE - 1] = '\0';
+  restore_interrupts_from_disabled(ints);
 
+  bool is_correct = (strcmp(final_input_morse, context->target_morse) == 0);
   context->last_answer_correct = is_correct;
-  context->last_input_decoded = from_morse((const char *)morse_code_buffer);
+
+  decode_morse_word(final_input_morse, context->last_input_decoded,
+                    MORSE_BUFFER_SIZE);
 
   return is_correct;
 }
@@ -123,16 +130,23 @@ void display_result(const GameContext *context) {
          "==============================================================\n\n",
          context->current_config.level_number);
 
-  if (context->current_level_index == 1 || context->current_level_index == 2) {
-    printf("\t\t\t\t\t\t\tTarget Character: %s (%s)\n", context->target_char,
-           context->target_morse);
+  if (context->current_level_index < 2) {
+    printf("\t\t\t\t\t\t\tTarget Character: %s (%s)\n",
+           context->target_challenge, context->target_morse);
   } else {
-    printf("\t\t\t\t\t\t\tTarget Word: %s (%s)\n", context->target_char,
-           context->target_morse);
+    printf("\t\t\t\t\t\t\tTarget Word:      %s (%s)\n",
+           context->target_challenge, context->target_morse);
   }
 
-  printf("\t\t\t\t\t\t\tYour Input:       %s -> %s\n",
-         (const char *)morse_code_buffer, context->last_input_decoded);
+  char final_input_morse[MORSE_BUFFER_SIZE];
+  uint32_t ints = save_and_disable_interrupts();
+  strncpy(final_input_morse, (const char *)morse_code_buffer,
+          MORSE_BUFFER_SIZE - 1);
+  final_input_morse[MORSE_BUFFER_SIZE - 1] = '\0';
+  restore_interrupts_from_disabled(ints);
+
+  printf("\t\t\t\t\t\t\tYour Input:       %s -> %s\n", final_input_morse,
+         context->last_input_decoded);
 
   printf("\t\t\t\t\t\t\tResult: %s\n",
          context->last_answer_correct ? "CORRECT!" : "INCORRECT!");

@@ -70,21 +70,74 @@ char from_morse(const char *code) {
   return '?';
 }
 
-const char *rand_challenge(GameContext *context) {
-  static char
-      char_buffer[2]; // static so we don't have to malloc or pass in a buffer
+char *word_to_morse(const char *word, char *output_buffer, size_t buffer_size) {
+  if (!word || !output_buffer || buffer_size == 0) {
+    return NULL;
+  }
 
-  if (context->current_level_index < 2) { // character for level 1 and 2
-    int num = rand() % 36;
+  output_buffer[0] = '\0';
+  size_t current_len = 0;
+  bool first_char = true;
 
-    if (num <= 9) {
-      char_buffer[0] = '0' + num;
-      char_buffer[1] = '\0';
-      return char_buffer;
-    } else {
-      char_buffer[0] = 'A' + (num - 10);
-      char_buffer[1] = '\0';
+  for (size_t i = 0; word[i] != '\0'; ++i) {
+    const char *morse_char = to_morse(word[i]);
+    size_t morse_char_len = strlen(morse_char);
+    size_t space_len = first_char ? 0 : 1;
+
+    if (!first_char) {
+      strcat(output_buffer, " ");
+      current_len++;
     }
+
+    strcat(output_buffer, morse_char);
+    current_len += morse_char_len;
+
+    first_char = false; // everything after the first character should get a
+                        // space prefix (other than the last, will get to this)
+  }
+  // output_buffer is already null-terminated by strcat
+
+  return output_buffer;
+}
+
+void decode_morse_word(const char *morse_input, char *output_buffer,
+                       size_t buffer_size) {
+  if (!morse_input || !output_buffer || buffer_size == 0) {
+    if (output_buffer && buffer_size > 0)
+      output_buffer[0] = '\0';
+    return;
+  }
+
+  output_buffer[0] = '\0';
+  size_t output_len = 0;
+
+  // need a mutable copy for strtok
+  char morse_copy[MORSE_BUFFER_SIZE];
+  strncpy(morse_copy, morse_input, MORSE_BUFFER_SIZE - 1);
+  morse_copy[MORSE_BUFFER_SIZE - 1] = '\0';
+
+  char *morse_char = strtok(morse_copy, " ");
+
+  while (morse_char != NULL) {
+    char decoded_c = from_morse(morse_char);
+
+    output_buffer[output_len++] = decoded_c;
+    output_buffer[output_len] = '\0';
+
+    morse_char = strtok(NULL, " "); // get next character
+  }
+}
+
+const char *rand_challenge(GameContext *context) {
+  static char char_buffer[2];
+
+  if (context->current_level_index < 2) {
+    int num = rand() % MORSE_TABLE_SIZE;
+
+    char_buffer[0] = morseTable[num].character;
+    char_buffer[1] = '\0';
+    return char_buffer;
+
   } else {
     int num = rand() % WORD_LIST_COUNT;
     return word_list[num];

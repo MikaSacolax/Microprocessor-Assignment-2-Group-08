@@ -17,8 +17,6 @@ extern volatile unsigned char morse_code_buffer[];
 extern volatile uint32_t current;
 extern volatile uint32_t sequence_complete_flag;
 extern volatile uint32_t new_char_flag;
-
-const uint32_t NUM_LEVELS = 4;
 const uint32_t MAX_LEVEL_INDEX = NUM_LEVELS - 1;
 uint32_t loops_for_level = 5;
 
@@ -102,8 +100,7 @@ int main() {
       display_result(&game_context);
 
       if (game_context.last_answer_correct) {
-        // plenty of scope for change here
-        // just going to cycle through level 1 and 2 for now
+        loops_for_level--;
 
         if (loops_for_level == 0) {
           if (game_context.current_level_index < MAX_LEVEL_INDEX) {

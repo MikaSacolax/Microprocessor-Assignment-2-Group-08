@@ -1,6 +1,7 @@
 #ifndef GAME_LOGIC_H
 #define GAME_LOGIC_H
 
+#include "morse_utils.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -12,6 +13,7 @@ typedef struct {
 } LevelConfig;
 
 extern const LevelConfig level_configs[];
+extern const uint32_t NUM_LEVELS;
 
 typedef enum {
   GAME_STATE_WAITING_MENU_INPUT,
@@ -26,9 +28,10 @@ typedef struct {
   GameState current_state;
   int current_level_index;
   LevelConfig current_config;
-  const char *target_char;
+  const char *target_challenge;
+  char target_morse_buffer[MORSE_BUFFER_SIZE];
   const char *target_morse;
-  char last_input_decoded;
+  char last_input_decoded[MORSE_BUFFER_SIZE];
   bool last_answer_correct;
 } GameContext;
 
