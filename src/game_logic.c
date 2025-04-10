@@ -26,7 +26,9 @@ void setup_level(GameContext *context, int level_index) {
   context->current_level_index = level_index;
   context->current_config = level_configs[level_index];
   context->current_state = GAME_STATE_PRESENT_CHALLENGE;
-  generate_challenge(context);
+
+  context->challenges_attempted_this_level = 0;
+  context->correct_challenges_this_level = 0;
 }
 
 void generate_challenge(GameContext *context) {
