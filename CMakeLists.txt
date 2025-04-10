@@ -36,7 +36,7 @@ pico_sdk_init()
 
 add_executable(Assignment_2 src/main.c src/asm.S src/morse_utils.h src/morse_utils.c src/display_utils.h 
                             src/display_utils.c src/game_logic.c src/game_logic.h src/sdk_asm_helpers.c
-                            src/sdk_asm_helpers.h)
+                            src/sdk_asm_helpers.h src/asm_interface.h src/asm_interface.c)
 
 pico_set_program_name(Assignment_2 "Assignment_2")
 pico_set_program_version(Assignment_2 "0.1")

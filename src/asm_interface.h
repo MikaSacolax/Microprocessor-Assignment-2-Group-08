@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define MORSE_BUFFER_SIZE = 1024;
+// be careful to make this exactly equal to the buffer defined in the assembly
+#define MORSE_BUFFER_SIZE 1024
 
 bool asm_interface_is_sequence_complete();
 bool asm_interface_has_new_char();

@@ -71,7 +71,7 @@ int main() {
   return 0;
 }
 
-void run_main_menu(GameContext *context) {
+void main_menu(GameContext *context) {
   print_main_menu();
 
   while (context->current_state == GAME_STATE_MAIN_MENU) {

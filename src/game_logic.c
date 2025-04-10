@@ -1,7 +1,7 @@
 #include "game_logic.h"
+#include "asm_interface.h"
 #include "display_utils.h"
 #include "morse_utils.h"
-#include "src/asm_interface.h"
 #include <hardware/sync.h>
 #include <pico/time.h>
 #include <stdio.h>
@@ -166,7 +166,7 @@ void handle_game_complete(GameContext *context) {
   // clang-format off
   printf("***********************************************************************\n");
   printf("                          CONGRATULATIONS!\n");
-  printf("                      You have won the game!\n");
+  printf("                       You have won the game!\n");
   printf("***********************************************************************\n\n");
   printf("                     Returning to Main Menu...\n");
   // clang-format on
