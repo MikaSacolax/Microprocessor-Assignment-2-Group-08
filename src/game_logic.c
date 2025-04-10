@@ -56,6 +56,7 @@ bool check_answer(GameContext *context) {
     context->correct_challenges_this_level++;
   } else {
     context->current_lives--;
+    context->correct_challenges_this_level = 0;
   }
 
   return is_correct;

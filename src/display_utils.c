@@ -65,8 +65,8 @@ void display_challenge_screen(const GameContext *context,
                               const char *current_input,
                               const char *decoded_input, bool is_waiting) {
   clear_screen();
-  printf("=========================== Level %d: Challenge %d/%d "
-         "===========================\n\n",
+  printf("======================= Level %d: Streak %d/%d "
+         "========================\n\n",
          context->current_config.level_number,
          context->challenges_attempted_this_level + 1, ROUNDS_PER_LEVEL);
 
