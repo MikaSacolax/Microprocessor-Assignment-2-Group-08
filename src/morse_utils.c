@@ -19,7 +19,7 @@ const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'2', "..---"}, {'3', "...--"}, {'4', "....-"}, {'5', "....."},
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."}};
 
-char word_list[20][100] = {
+char word_list[WORD_LIST_COUNT][30] = {
     "SKETCH",      "MOUTH",       "INDEX",        "SHOUT",
     "FADE",        "INCIDENT",    "EXPERIENCE",   "RETIREMENT",
     "PENETRATE",   "PRODUCER",    "UNCERTAINTY",  "POLICY",
@@ -70,19 +70,23 @@ char from_morse(const char *code) {
   return '?';
 }
 
-const char *rand_char(GameContext *context) {
-  srand(time_us_64());
+const char *rand_challenge(GameContext *context) {
+  static char
+      char_buffer[2]; // static so we don't have to malloc or pass in a buffer
 
-  if (context->current_level_index == 1 || context->current_level_index == 2) {
+  if (context->current_level_index < 2) { // character for level 1 and 2
     int num = rand() % 36;
 
     if (num <= 9) {
-      return ('0' + num);
+      char_buffer[0] = '0' + num;
+      char_buffer[1] = '\0';
+      return char_buffer;
     } else {
-      return ('A' + num - 9);
+      char_buffer[0] = 'A' + (num - 10);
+      char_buffer[1] = '\0';
     }
   } else {
-    int num = rand() % 100;
+    int num = rand() % WORD_LIST_COUNT;
     return word_list[num];
   }
 }
@@ -126,7 +130,7 @@ void get_morse_input_interactive(char *output_buffer, size_t buffer_size) {
 
   while (true) {
     bool sequence_has_completed = false;
-    char char_to_printchar_to_print = '\0';
+    char char_to_print = '\0';
     uint32_t ints = save_and_disable_interrupts();
     if (sequence_complete_flag) {
       sequence_has_completed = true;
@@ -141,16 +145,15 @@ void get_morse_input_interactive(char *output_buffer, size_t buffer_size) {
       } else if (asm_current_index > 0) {
         uint32_t added_char_index_in_asm_buf = asm_current_index - 1;
         if (added_char_index_in_asm_buf < MORSE_BUFFER_SIZE) {
-          char_to_printchar_to_print =
-              (char)morse_code_buffer[added_char_index_in_asm_buf];
+          char_to_print = (char)morse_code_buffer[added_char_index_in_asm_buf];
         }
       }
     }
 
     restore_interrupts_from_disabled(ints);
 
-    if (char_to_printchar_to_print != '\0') {
-      printf("%c", char_to_printchar_to_print);
+    if (char_to_print != '\0') {
+      printf("%c", char_to_print);
     }
 
     if (sequence_has_completed) {

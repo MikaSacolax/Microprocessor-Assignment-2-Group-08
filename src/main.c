@@ -4,6 +4,7 @@
 #include <pico/time.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "display_utils.h"
@@ -28,7 +29,8 @@ void main_menu(GameContext *context);
 
 int main() {
   stdio_init_all(); // Initialise all basic IO
-  sleep_ms(5000);   // time to allow serial monitor connection
+  srand(time_us_64());
+  sleep_ms(5000); // time to allow serial monitor connection
 
   main_asm();
 
@@ -104,9 +106,9 @@ int main() {
 
         if (loops_for_level == 0) {
           if (game_context.current_level_index == 4) {
-            printf(
-                "------------ Place Holder ------------"); //------------ Place
-                                                           //Holder ------------
+            printf("------------ Place Holder ------------"); //------------
+                                                              // Place Holder
+                                                              // ------------
           } else {
             game_context.current_level_index =
                 game_context.current_level_index + 1;

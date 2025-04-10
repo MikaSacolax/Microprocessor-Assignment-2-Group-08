@@ -9,6 +9,7 @@ extern volatile unsigned char morse_code_buffer[];
 extern volatile uint32_t current;
 extern volatile uint32_t sequence_complete_flag;
 extern volatile uint32_t new_char_flag;
+const uint32_t WORD_LIST_COUNT = 20;
 
 // structure to hold a character and morse representation for easy lookups
 typedef struct {
@@ -25,7 +26,7 @@ const char *to_morse(char c);
 char from_morse(const char *morse);
 
 // random char generation
-const char *rand_char(GameContext *context);
+const char *rand_challenge(GameContext *context);
 
 // flushes the morse buffer with null terminators
 void flush_asm_state();
