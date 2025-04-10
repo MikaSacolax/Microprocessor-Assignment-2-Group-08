@@ -138,7 +138,7 @@ void handle_show_result(GameContext *context) {
   busy_wait_ms(RESULT_DISPLAY_MS);
 
   if (context->current_lives <= 0) {
-    context->current_lives = GAME_STATE_GAME_OVER;
+    context->current_state = GAME_STATE_GAME_OVER;
   } else if (context->challenges_attempted_this_level >= ROUNDS_PER_LEVEL) {
     context->current_state = GAME_STATE_LEVEL_COMPLETE;
   } else {
@@ -180,6 +180,7 @@ void handle_game_over(GameContext *context) {
   fflush(stdout);
   busy_wait_ms(4000);
   context->current_state = GAME_STATE_MAIN_MENU;
+  initialize_game_context(context);
 }
 
 void handle_game_complete(GameContext *context) {
@@ -195,4 +196,5 @@ void handle_game_complete(GameContext *context) {
   fflush(stdout);
   busy_wait_ms(4000);
   context->current_state = GAME_STATE_MAIN_MENU;
+  initialize_game_context(context);
 }
