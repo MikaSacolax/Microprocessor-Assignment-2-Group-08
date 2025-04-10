@@ -21,7 +21,7 @@ typedef struct {
 enum { MORSE_TABLE_SIZE = 36, MORSE_BUFFER_SIZE = 1024 };
 
 // conversion funcs
-const char *to_morse(char c);
+const char *to_morse(const char *c);
 char from_morse(const char *morse);
 
 // random char generation

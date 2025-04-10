@@ -20,10 +20,10 @@ void setup_level(GameContext *context, int level_index) {
 }
 
 void generate_challenge(GameContext *context) {
-  context->target_char = rand_char();
+  context->target_char = rand_char(context);
   context->target_morse = to_morse(context->target_char);
   while (strlen(context->target_morse) == 0) {
-    context->target_char = rand_char();
+    context->target_char = rand_char(context);
     context->target_morse = to_morse(context->target_char);
   }
 }

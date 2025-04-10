@@ -19,14 +19,14 @@ const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'2', "..---"}, {'3', "...--"}, {'4', "....-"}, {'5', "....."},
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."}};
 
-    char word_list[20][100] = {"SKETCH",	"MOUTH",	"INDEX",	"SHOUT",	"FADE",	"INCIDENT",	"EXPERIENCE",	"RETIREMENT",	"PENETRATE",	"PRODUCER",	"UNCERTAINTY",	"POLICY",	"ASSAULT",	"MUSHROOM",	
+    char word_list[][100] = {"SKETCH", "MOUTH",	"INDEX",	"SHOUT",	"FADE",	"INCIDENT",	"EXPERIENCE",	"RETIREMENT",	"PENETRATE",	"PRODUCER",	"UNCERTAINTY",	"POLICY",	"ASSAULT",	"MUSHROOM",	
       "EXTENSION",	"EGG",	"STRANGE",	"LOOTING",	"ORGAN",	"GUITAR",	"DIAGRAM",	"SERVE",	"REQUIREMENT",	"OFFER",	"SURVIVAL",	"NONSENSE",	"CLEAN",	"COLORFUL",	"OPERATIONAL",	"HIGHWAY",	"TUBE",	
       "FRESH",	"LIFT",	"MAIN",	"AISLE",	"OPINION",	"VICTORY",	"KEEP",	"SEE",	"EXPERIENCED",	"OVEREAT",	"EXPORT",	"SPOT",	"PAYMENT",	"PARTICLE",	"POTENTIAL",	"SATISFIED",	"TRICK",	"POSSESSION",	
       "STUN",	"PRESTIGE",	"OPINION",	"HARASS",	"HOUSEWIFE",	"REGISTRATION",	"BOTTOM",	"REST",	"FINE",	"COVERAGE",	"SEASONAL",	"ASTONISHING",	"SEA",	"RITUAL",	"UNDERSTANDING",	"HABIT",	"BEAR",	
       "SWITCH",	"GRANDFATHER",	"KNOT",	"BOAT",	"MONK",	"TIPTOE",	"DISGRACE",	"FREIGHT",	"UNLIKE",	"PUDDING",	"NATIONALIST",	"FLOOR",	"ASSAULT",	"INDOOR",	"DISCIPLINE",	"LOUD",	"LEGISLATION",	"SKATE",	
       "DREAM",	"LUNCH",	"LINEN",	"WEST",	"TRAINING",	"TRAP",	"TOTAL",	"KNOW",	"CRUELTY",	"ELECTRONICS",	"VIEW",	"FACTOR",	"PERFORATE",	"EXTORT",	"INTEGRITY",	"BRAINSTORM"};
     
-const char *to_morse(char c) {
+const char *to_morse(const char *c) {
   // make every character a capital letter
   c = toupper((unsigned char)c);
 
@@ -57,9 +57,9 @@ const char *rand_char(GameContext *context) {
     int num = rand() % 36;
 
     if (num <= 9) {
-      return ('0' + num);
+      return ("0" + num);
     } else {
-      return ('A' + num - 9);
+      return ("A" + num - 9);
     }
   }
   else {
