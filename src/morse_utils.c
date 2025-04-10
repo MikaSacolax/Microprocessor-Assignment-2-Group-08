@@ -19,13 +19,13 @@ const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'2', "..---"}, {'3', "...--"}, {'4', "....-"}, {'5', "....."},
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."}};
 
-char word_list[20][100] = {"sketch",	"mouth",	"index",	"shout",	"fade",	"incident",	"experience",	"retirement",	"penetrate",	"producer",	"uncertainty",	"policy",	"assault",	"mushroom",	
-  "extension",	"egg",	"strange",	"looting",	"organ",	"guitar",	"diagram",	"serve",	"requirement",	"offer",	"survival",	"nonsense",	"clean",	"colorful",	"operational",	"highway",	"tube",	
-  "fresh",	"lift",	"main",	"aisle",	"opinion",	"victory",	"keep",	"see",	"experienced",	"overeat",	"export",	"spot",	"payment",	"particle",	"potential",	"satisfied",	"trick",	"possession",	
-  "stun",	"prestige",	"opinion",	"harass",	"housewife",	"registration",	"bottom",	"rest",	"fine",	"coverage",	"seasonal",	"astonishing",	"sea",	"ritual",	"understanding",	"habit",	"bear",	
-  "switch",	"grandfather",	"knot",	"boat",	"monk",	"tiptoe",	"disgrace",	"freight",	"unlike",	"pudding",	"nationalist",	"floor",	"assault",	"indoor",	"discipline",	"loud",	"legislation",	"skate",	
-  "dream",	"lunch",	"linen",	"west",	"training",	"trap",	"total",	"know",	"cruelty",	"electronics",	"view",	"factor",	"perforate",	"extort",	"integrity",	"brainstorm"};
-
+    char word_list[20][100] = {"SKETCH",	"MOUTH",	"INDEX",	"SHOUT",	"FADE",	"INCIDENT",	"EXPERIENCE",	"RETIREMENT",	"PENETRATE",	"PRODUCER",	"UNCERTAINTY",	"POLICY",	"ASSAULT",	"MUSHROOM",	
+      "EXTENSION",	"EGG",	"STRANGE",	"LOOTING",	"ORGAN",	"GUITAR",	"DIAGRAM",	"SERVE",	"REQUIREMENT",	"OFFER",	"SURVIVAL",	"NONSENSE",	"CLEAN",	"COLORFUL",	"OPERATIONAL",	"HIGHWAY",	"TUBE",	
+      "FRESH",	"LIFT",	"MAIN",	"AISLE",	"OPINION",	"VICTORY",	"KEEP",	"SEE",	"EXPERIENCED",	"OVEREAT",	"EXPORT",	"SPOT",	"PAYMENT",	"PARTICLE",	"POTENTIAL",	"SATISFIED",	"TRICK",	"POSSESSION",	
+      "STUN",	"PRESTIGE",	"OPINION",	"HARASS",	"HOUSEWIFE",	"REGISTRATION",	"BOTTOM",	"REST",	"FINE",	"COVERAGE",	"SEASONAL",	"ASTONISHING",	"SEA",	"RITUAL",	"UNDERSTANDING",	"HABIT",	"BEAR",	
+      "SWITCH",	"GRANDFATHER",	"KNOT",	"BOAT",	"MONK",	"TIPTOE",	"DISGRACE",	"FREIGHT",	"UNLIKE",	"PUDDING",	"NATIONALIST",	"FLOOR",	"ASSAULT",	"INDOOR",	"DISCIPLINE",	"LOUD",	"LEGISLATION",	"SKATE",	
+      "DREAM",	"LUNCH",	"LINEN",	"WEST",	"TRAINING",	"TRAP",	"TOTAL",	"KNOW",	"CRUELTY",	"ELECTRONICS",	"VIEW",	"FACTOR",	"PERFORATE",	"EXTORT",	"INTEGRITY",	"BRAINSTORM"};
+    
 const char *to_morse(char c) {
   // make every character a capital letter
   c = toupper((unsigned char)c);
