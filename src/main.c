@@ -18,7 +18,8 @@ extern volatile uint32_t current;
 extern volatile uint32_t sequence_complete_flag;
 extern volatile uint32_t new_char_flag;
 
-const uint32_t NUM_LEVELS = 2;
+const uint32_t NUM_LEVELS = 4;
+const uint32_t MAX_LEVEL_INDEX = NUM_LEVELS - 1;
 uint32_t loops_for_level = 5;
 
 // Declare the main assembly code entry point.
@@ -66,10 +67,10 @@ int main() {
           current = 0;
           skip_this_char = true;
 
-          uint32_t now = timer_hw->timelr;
-          uint32_t new_alarm1_time = now + 2000000;
-          timer_hw->alarm[1] = new_alarm1_time;
-          timer_hw->intr = 0b10;
+          // uint32_t now = timer_hw->timelr;
+          // uint32_t new_alarm1_time = now + 2000000;
+          // timer_hw->alarm[1] = new_alarm1_time;
+          // timer_hw->intr = 0b10;
         }
         restore_interrupts_from_disabled(ints);
 
@@ -105,15 +106,24 @@ int main() {
         // just going to cycle through level 1 and 2 for now
 
         if (loops_for_level == 0) {
-          if (game_context.current_level_index == 4) {
-            printf("------------ Place Holder ------------"); //------------
-                                                              // Place Holder
-                                                              // ------------
+          if (game_context.current_level_index < MAX_LEVEL_INDEX) {
+            game_context.current_level_index++;
+            clear_screen();
+            printf("==========================================================="
+                   "= Nice! Advancing level..."
+                   "========================================================="
+                   "===\n\n");
+            loops_for_level = 5;
           } else {
-            game_context.current_level_index =
-                game_context.current_level_index + 1;
-            game_context.current_config =
-                level_configs[game_context.current_level_index];
+            printf("==========================================================="
+                   "= Nice! You've finished the game... "
+                   "========================================================="
+                   "===\n\n");
+            loops_for_level = 5;
+            game_context.current_level_index = 0;
+            game_context.current_state = GAME_STATE_START_LEVEL;
+
+            main_menu(&game_context);
           }
 
           // Life and colour logic
@@ -158,20 +168,20 @@ void main_menu(GameContext *context) {
 
     char decoded_char = from_morse(level_select_buffer);
 
-    if (decoded_char == '1' || decoded_char == '2') {
+    bool valid_level = false;
+    if (decoded_char >= '1' && decoded_char < ('1' + NUM_LEVELS)) {
+      valid_level = true;
       context->current_level_index = decoded_char - '1';
+    }
 
+    if (valid_level) {
       context->current_state = GAME_STATE_START_LEVEL;
-      printf("\n                                        Selected Level %d. "
-             "Starting "
-             "game!\n\n",
+      printf("\n                     Selected Level %d. Starting game!\n\n",
              context->current_level_index + 1);
       busy_wait_ms(1000);
-      break;
+      break; // Exit menu loop
     } else {
-      printf("\n                                        Invalid level "
-             "selection ('%s' -> "
-             "'%c'). Try again:\n",
+      printf("\n                     Invalid level selection ('%s' -> '%c'). ",
              level_select_buffer, decoded_char);
     }
   }
