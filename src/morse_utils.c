@@ -19,13 +19,33 @@ const MorseMap morseTable[MORSE_TABLE_SIZE] = {
     {'2', "..---"}, {'3', "...--"}, {'4', "....-"}, {'5', "....."},
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."}};
 
-    char word_list[20][100] = {"SKETCH",	"MOUTH",	"INDEX",	"SHOUT",	"FADE",	"INCIDENT",	"EXPERIENCE",	"RETIREMENT",	"PENETRATE",	"PRODUCER",	"UNCERTAINTY",	"POLICY",	"ASSAULT",	"MUSHROOM",	
-      "EXTENSION",	"EGG",	"STRANGE",	"LOOTING",	"ORGAN",	"GUITAR",	"DIAGRAM",	"SERVE",	"REQUIREMENT",	"OFFER",	"SURVIVAL",	"NONSENSE",	"CLEAN",	"COLORFUL",	"OPERATIONAL",	"HIGHWAY",	"TUBE",	
-      "FRESH",	"LIFT",	"MAIN",	"AISLE",	"OPINION",	"VICTORY",	"KEEP",	"SEE",	"EXPERIENCED",	"OVEREAT",	"EXPORT",	"SPOT",	"PAYMENT",	"PARTICLE",	"POTENTIAL",	"SATISFIED",	"TRICK",	"POSSESSION",	
-      "STUN",	"PRESTIGE",	"OPINION",	"HARASS",	"HOUSEWIFE",	"REGISTRATION",	"BOTTOM",	"REST",	"FINE",	"COVERAGE",	"SEASONAL",	"ASTONISHING",	"SEA",	"RITUAL",	"UNDERSTANDING",	"HABIT",	"BEAR",	
-      "SWITCH",	"GRANDFATHER",	"KNOT",	"BOAT",	"MONK",	"TIPTOE",	"DISGRACE",	"FREIGHT",	"UNLIKE",	"PUDDING",	"NATIONALIST",	"FLOOR",	"ASSAULT",	"INDOOR",	"DISCIPLINE",	"LOUD",	"LEGISLATION",	"SKATE",	
-      "DREAM",	"LUNCH",	"LINEN",	"WEST",	"TRAINING",	"TRAP",	"TOTAL",	"KNOW",	"CRUELTY",	"ELECTRONICS",	"VIEW",	"FACTOR",	"PERFORATE",	"EXTORT",	"INTEGRITY",	"BRAINSTORM"};
-    
+char word_list[20][100] = {
+    "SKETCH",      "MOUTH",       "INDEX",        "SHOUT",
+    "FADE",        "INCIDENT",    "EXPERIENCE",   "RETIREMENT",
+    "PENETRATE",   "PRODUCER",    "UNCERTAINTY",  "POLICY",
+    "ASSAULT",     "MUSHROOM",    "EXTENSION",    "EGG",
+    "STRANGE",     "LOOTING",     "ORGAN",        "GUITAR",
+    "DIAGRAM",     "SERVE",       "REQUIREMENT",  "OFFER",
+    "SURVIVAL",    "NONSENSE",    "CLEAN",        "COLORFUL",
+    "OPERATIONAL", "HIGHWAY",     "TUBE",         "FRESH",
+    "LIFT",        "MAIN",        "AISLE",        "OPINION",
+    "VICTORY",     "KEEP",        "SEE",          "EXPERIENCED",
+    "OVEREAT",     "EXPORT",      "SPOT",         "PAYMENT",
+    "PARTICLE",    "POTENTIAL",   "SATISFIED",    "TRICK",
+    "POSSESSION",  "STUN",        "PRESTIGE",     "OPINION",
+    "HARASS",      "HOUSEWIFE",   "REGISTRATION", "BOTTOM",
+    "REST",        "FINE",        "COVERAGE",     "SEASONAL",
+    "ASTONISHING", "SEA",         "RITUAL",       "UNDERSTANDING",
+    "HABIT",       "BEAR",        "SWITCH",       "GRANDFATHER",
+    "KNOT",        "BOAT",        "MONK",         "TIPTOE",
+    "DISGRACE",    "FREIGHT",     "UNLIKE",       "PUDDING",
+    "NATIONALIST", "FLOOR",       "ASSAULT",      "INDOOR",
+    "DISCIPLINE",  "LOUD",        "LEGISLATION",  "SKATE",
+    "DREAM",       "LUNCH",       "LINEN",        "WEST",
+    "TRAINING",    "TRAP",        "TOTAL",        "KNOW",
+    "CRUELTY",     "ELECTRONICS", "VIEW",         "FACTOR",
+    "PERFORATE",   "EXTORT",      "INTEGRITY",    "BRAINSTORM"};
+
 const char *to_morse(char c) {
   // make every character a capital letter
   c = toupper((unsigned char)c);
@@ -52,7 +72,7 @@ char from_morse(const char *code) {
 
 const char *rand_char(GameContext *context) {
   srand(time_us_64());
-  
+
   if (context->current_level_index == 1 || context->current_level_index == 2) {
     int num = rand() % 36;
 
@@ -61,12 +81,10 @@ const char *rand_char(GameContext *context) {
     } else {
       return ('A' + num - 9);
     }
-  }
-  else {
+  } else {
     int num = rand() % 100;
     return word_list[num];
   }
-  
 }
 
 void flush_asm_state() {

@@ -1,9 +1,9 @@
 #ifndef MORSE_UTILS_H
 #define MORSE_UTILS_H
 
+#include "game_logic.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "game_logic.h"
 
 extern volatile unsigned char morse_code_buffer[];
 extern volatile uint32_t current;

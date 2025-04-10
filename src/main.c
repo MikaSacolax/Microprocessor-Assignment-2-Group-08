@@ -104,22 +104,23 @@ int main() {
 
         if (loops_for_level == 0) {
           if (game_context.current_level_index == 4) {
-            printf("------------ Place Holder ------------"); //------------ Place Holder ------------
-          }
-          else {
-            game_context.current_level_index = game_context.current_level_index + 1;
-            game_context.current_config = level_configs[game_context.current_level_index];
+            printf(
+                "------------ Place Holder ------------"); //------------ Place
+                                                           //Holder ------------
+          } else {
+            game_context.current_level_index =
+                game_context.current_level_index + 1;
+            game_context.current_config =
+                level_configs[game_context.current_level_index];
           }
 
           // Life and colour logic
 
-        }
-        else {
+        } else {
           loops_for_level = loops_for_level - 1;
           // Life and colour logic
         }
-      }
-      else {
+      } else {
         // Last answer was wrong
         loops_for_level = 5;
         // Life and colour logic
