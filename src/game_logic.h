@@ -26,7 +26,7 @@ typedef struct {
   GameState current_state;
   int current_level_index;
   LevelConfig current_config;
-  char target_char;
+  const char *target_char;
   const char *target_morse;
   char last_input_decoded;
   bool last_answer_correct;

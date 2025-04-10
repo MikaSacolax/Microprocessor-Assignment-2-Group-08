@@ -34,7 +34,14 @@ void display_challenge(const GameContext *context) {
       "============================================================== Level %d "
       "==============================================================\n\n",
       context->current_config.level_number);
-  printf("\t\t\t\t\t\t\tTarget Character:  %c\n", context->target_char);
+  
+  if (context->current_level_index == 1 || context->current_level_index == 2)
+  {
+    printf("\t\t\t\t\t\t\tTarget Character:  %s\n", context->target_char);
+  }
+  else {
+    printf("\t\t\t\t\t\t\tTarget Word:  %s\n", context->target_char);
+  }
 
   if (context->current_config.show_morse_hint) {
     printf("\t\t\t\t\t\t\tMorse Code Hint:   %s\n", context->target_morse);
@@ -76,7 +83,14 @@ void display_player_input(const GameContext *context) {
       "============================================================== Level %d "
       "==============================================================\n\n",
       context->current_config.level_number);
-  printf("\t\t\t\t\t\t\tTarget Character:  %c\n", context->target_char);
+  
+  if (context->current_level_index == 1 || context->current_level_index == 2){
+    printf("\t\t\t\t\t\t\tTarget Character:  %s\n", context->target_char);
+  }
+  else {
+    printf("\t\t\t\t\t\t\tTarget Word:  %s\n", context->target_char);
+  }
+  
   if (context->current_config.show_morse_hint) {
     printf("\t\t\t\t\t\t\tMorse Code Hint:   %s\n", context->target_morse);
   }
@@ -88,7 +102,7 @@ void display_player_input(const GameContext *context) {
   }
   printf("]\n");
 
-  printf("\t\t\t\t\t\t\tDecodes To:        [%c]\n", decoded_char);
+  printf("\t\t\t\t\t\t\tDecodes To:        [%s]\n", decoded_char);
   printf("\n\t\t\t\t\t\t\tInputting...\n");
   centre_display();
 }
@@ -112,10 +126,17 @@ void display_result(const GameContext *context) {
          "==============================================================\n\n",
          context->current_config.level_number);
 
-  printf("\t\t\t\t\t\t\tTarget Character: %c (%s)\n", context->target_char,
-         context->target_morse);
+  
+  if (context->current_level_index == 1 || context->current_level_index == 2) {
+    printf("\t\t\t\t\t\t\tTarget Character: %s (%s)\n", context->target_char,
+            context->target_morse);
+  }
+  else {
+    printf("\t\t\t\t\t\t\tTarget Word: %s (%s)\n", context->target_char,
+            context->target_morse);
+  }
 
-  printf("\t\t\t\t\t\t\tYour Input:       %s -> %c\n",
+  printf("\t\t\t\t\t\t\tYour Input:       %s -> %s\n",
          (const char *)morse_code_buffer, context->last_input_decoded);
 
   printf("\t\t\t\t\t\t\tResult: %s\n",
