@@ -92,45 +92,50 @@ int main() {
 
     case GAME_STATE_SHOW_RESULT:
       display_result(&game_context);
+      bool advance_level = false;
 
       if (game_context.last_answer_correct) {
         loops_for_level--;
 
         if (loops_for_level == 0) {
+          advance_level = true;
           if (game_context.current_level_index < MAX_LEVEL_INDEX) {
             game_context.current_level_index++;
             clear_screen();
             printf("==========================================================="
-                   "= Nice! Advancing level..."
-                   "========================================================="
-                   "===\n\n");
+                   "===="
+                   " Nice! Advancing level..."
+                   " =========================================================="
+                   "=====\n\n");
+            busy_wait_ms(1500);
             loops_for_level = 5;
+
           } else {
+            clear_screen();
             printf("==========================================================="
-                   "= Nice! You've finished the game... "
-                   "========================================================="
-                   "===\n\n");
+                   "===="
+                   " Nice! You've finished the game... Returning to Menu"
+                   " =========================================================="
+                   "=====\n\n");
+            busy_wait_ms(3000);
             loops_for_level = 5;
             game_context.current_level_index = 0;
-            game_context.current_state = GAME_STATE_START_LEVEL;
 
             main_menu(&game_context);
+            break;
           }
-
-          // Life and colour logic
-
-        } else {
-          loops_for_level = loops_for_level - 1;
-          // Life and colour logic
         }
+
       } else {
-        // Last answer was wrong
         loops_for_level = 5;
-        // Life and colour logic
       }
 
-      generate_challenge(&game_context);
-      game_context.current_state = GAME_STATE_PRESENT_CHALLENGE;
+      if (advance_level) {
+        game_context.current_state = GAME_STATE_START_LEVEL;
+      } else {
+        generate_challenge(&game_context);
+        game_context.current_state = GAME_STATE_PRESENT_CHALLENGE;
+      }
       break;
 
     default:
