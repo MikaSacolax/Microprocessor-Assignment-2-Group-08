@@ -20,6 +20,7 @@ void initialize_game_context(GameContext *context) {
   memset(context, 0, sizeof(GameContext));
   context->current_state = GAME_STATE_MAIN_MENU;
   context->current_level_index = 0;
+  context->current_lives = MAX_LIVES;
 }
 
 void setup_level(GameContext *context, int level_index) {
@@ -53,6 +54,8 @@ bool check_answer(GameContext *context) {
   context->challenges_attempted_this_level++;
   if (is_correct) {
     context->correct_challenges_this_level++;
+  } else {
+    context->current_lives--;
   }
 
   return is_correct;
@@ -134,7 +137,9 @@ void handle_show_result(GameContext *context) {
   display_result_screen(context, final_input_morse, RESULT_DISPLAY_MS / 1000);
   busy_wait_ms(RESULT_DISPLAY_MS);
 
-  if (context->challenges_attempted_this_level >= ROUNDS_PER_LEVEL) {
+  if (context->current_lives <= 0) {
+    context->current_lives = GAME_STATE_GAME_OVER;
+  } else if (context->challenges_attempted_this_level >= ROUNDS_PER_LEVEL) {
     context->current_state = GAME_STATE_LEVEL_COMPLETE;
   } else {
     generate_challenge(context);
@@ -147,7 +152,8 @@ void handle_level_complete(GameContext *context) {
   // clang-format off
   printf("=======================================================================\n");
   printf("                         Level %d Complete!\n", context->current_config.level_number);
-  printf("                  You got %d / %d correct!\n", context->correct_challenges_this_level, ROUNDS_PER_LEVEL);
+  printf("                      You got %d / %d correct!\n", context->correct_challenges_this_level, ROUNDS_PER_LEVEL);
+  printf("                    You finished with %d lives left.\n", context->current_lives);
   printf("=======================================================================\n\n");
   // clang-format on
 
@@ -160,6 +166,20 @@ void handle_level_complete(GameContext *context) {
     context->current_state = GAME_STATE_GAME_COMPLETE;
   }
   fflush(stdout);
+}
+
+void handle_game_over(GameContext *context) {
+  clear_screen();
+  // clang-format off
+  printf("=======================================================================\n");
+  printf("                              GAME OVER\n");
+  printf("                       You ran out of lives!\n");
+  printf("=======================================================================\n\n");
+  printf("                      Returning to Main Menu...\n");
+  // clang-format on
+  fflush(stdout);
+  busy_wait_ms(4000);
+  context->current_state = GAME_STATE_MAIN_MENU;
 }
 
 void handle_game_complete(GameContext *context) {

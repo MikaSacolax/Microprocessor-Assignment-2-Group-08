@@ -3,8 +3,6 @@
 #include <hardware/timer.h>
 #include <stdio.h>
 
-extern volatile unsigned char morse_code_buffer[];
-
 // clang-format off
 void print_main_menu() {
     clear_screen();
@@ -49,6 +47,17 @@ void clear_screen() {
   fflush(stdout);
 }
 
+// clang-format off
+// helper to draw hearts <3 <3 <3
+void draw_hearts(int lives) {
+  printf("\t\tLives: ");
+  if (lives >= 3) printf("<3 "); else printf("  ");
+  if (lives >= 2) printf("<3 "); else printf("  ");
+  if (lives >= 1) printf("<3 "); else printf("  ");
+  printf("\n");
+}
+// clang-format on
+
 // for vertical spacing
 void centre_display() { printf("\n\n\n\n\n\n\n\n"); }
 
@@ -60,6 +69,9 @@ void display_challenge_screen(const GameContext *context,
          "===========================\n\n",
          context->current_config.level_number,
          context->challenges_attempted_this_level + 1, ROUNDS_PER_LEVEL);
+
+  draw_hearts(context->current_lives);
+  printf("\n");
 
   // figure out label based on level type
   const char *target_label = (context->current_level_index < 2)
@@ -93,6 +105,9 @@ void display_result_screen(const GameContext *context, const char *final_input,
          "==============================\n\n",
          context->current_config.level_number);
 
+  draw_hearts(context->current_lives);
+  printf("\n");
+
   // figure out label based on level type
   const char *target_label = (context->current_level_index < 2)
                                  ? "Target Character:"
@@ -110,7 +125,9 @@ void display_result_screen(const GameContext *context, const char *final_input,
   if (countdown_secs > 0) {
     printf("\t\tNext challenge in %d seconds...\n", countdown_secs);
   } else {
-    printf("\t\tLoading next challenge...\n");
+    if (context->current_lives > 0) {
+      printf("\t\tLoading next challenge...\n");
+    }
   }
 
   centre_display();

@@ -9,7 +9,6 @@
 #include "game_logic.h"
 #include "morse_utils.h"
 
-// Declare the main assembly code entry point.
 void main_asm();
 
 // function declarations
@@ -58,6 +57,10 @@ int main() {
 
     case GAME_STATE_GAME_COMPLETE:
       handle_game_complete(&game_context);
+      break;
+
+    case GAME_STATE_GAME_OVER:
+      handle_game_over(&game_context);
       break;
 
     default:
