@@ -8,7 +8,7 @@ extern volatile unsigned char morse_code_buffer[];
 extern volatile uint32_t current;
 extern volatile uint32_t sequence_complete_flag;
 extern volatile uint32_t new_char_flag;
-const uint32_t WORD_LIST_COUNT = 100;
+#define WORD_LIST_COUNT 100
 
 typedef struct GameContext GameContext;
 

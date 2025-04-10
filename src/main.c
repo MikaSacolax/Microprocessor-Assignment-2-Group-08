@@ -12,7 +12,6 @@
 #include "morse_utils.h"
 #include "sdk_asm_helpers.h"
 
-const uint32_t MAX_LEVEL_INDEX = NUM_LEVELS - 1;
 uint32_t loops_for_level = 5;
 
 // Declare the main assembly code entry point.
