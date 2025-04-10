@@ -50,15 +50,23 @@ char from_morse(const char *code) {
   return '?';
 }
 
-char rand_char() {
+const char *rand_char(GameContext *context) {
   srand(time_us_64());
-  int num = rand() % 36;
+  
+  if (context->current_level_index == 1 || context->current_level_index == 2) {
+    int num = rand() % 36;
 
-  if (num <= 9) {
-    return ('0' + num);
-  } else {
-    return ('A' + num - 9);
+    if (num <= 9) {
+      return ('0' + num);
+    } else {
+      return ('A' + num - 9);
+    }
   }
+  else {
+    int num = rand() % 100;
+    return word_list[num];
+  }
+  
 }
 
 void flush_asm_state() {

@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "game_logic.h"
 
 extern volatile unsigned char morse_code_buffer[];
 extern volatile uint32_t current;
@@ -24,7 +25,7 @@ const char *to_morse(char c);
 char from_morse(const char *morse);
 
 // random char generation
-char rand_char();
+const char *rand_char(GameContext *context);
 
 // flushes the morse buffer with null terminators
 void flush_asm_state();
