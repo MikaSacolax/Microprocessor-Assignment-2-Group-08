@@ -61,8 +61,12 @@ typedef struct GameContext {
   int challenges_attempted_this_level;
   int correct_challenges_this_level;
   int current_lives;
+
+  // game stats
   uint64_t challenge_start_time_us;
   uint32_t last_challenge_duration_ms;
+  uint32_t ideal_time_ms;
+  uint32_t last_score_percentage;
 } GameContext;
 
 /**
