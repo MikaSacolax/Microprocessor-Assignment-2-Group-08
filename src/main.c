@@ -12,9 +12,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * @brief Function that handles button events and Morse code input buffer. Fully written in Arm Assembly.
+ * 
+ */
 void main_asm();
 
 // function declarations
+/**
+ * @brief Responsible for handling and calling all functions required for the start screen and level selection.
+ * 
+ * @param context 
+ */
 void main_menu(GameContext *context);
 
 int main() {
