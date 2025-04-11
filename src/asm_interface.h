@@ -1,3 +1,4 @@
+/** @file */
 #ifndef ASM_INTERFACE_H
 #define ASM_INTERFACE_H
 

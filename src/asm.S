@@ -1,3 +1,4 @@
+/** @file */
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/io_bank0.h"
 #include "hardware/regs/timer.h"

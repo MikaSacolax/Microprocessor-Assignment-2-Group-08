@@ -1,3 +1,4 @@
+/** @file */
 #ifndef MORSE_UTILS_H
 #define MORSE_UTILS_H
 

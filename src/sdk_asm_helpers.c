@@ -1,3 +1,4 @@
+/** @file */
 #include <hardware/gpio.h>
 #include <hardware/sync.h>
 #include <pico/stdlib.h>

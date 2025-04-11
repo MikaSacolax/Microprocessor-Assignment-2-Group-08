@@ -1,3 +1,4 @@
+/** @file */
 #include "display_utils.h"
 #include "game_logic.h"
 #include "hardware/pio.h"

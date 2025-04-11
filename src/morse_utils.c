@@ -1,3 +1,4 @@
+/** @file */
 #include "morse_utils.h"
 #include "game_logic.h"
 #include <ctype.h>

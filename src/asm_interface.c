@@ -1,3 +1,4 @@
+/** @file */
 #include "asm_interface.h"
 #include <hardware/sync.h>
 #include <string.h>

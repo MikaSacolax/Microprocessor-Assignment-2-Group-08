@@ -1,3 +1,4 @@
+/** @file */
 #include "hardware/pio.h"
 
 #define IS_RGBW true  // Will use RGBW format

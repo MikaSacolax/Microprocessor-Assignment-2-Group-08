@@ -1,4 +1,4 @@
-#ifndef GAME_LOGIC_H
+/** @file */#ifndef GAME_LOGIC_H
 #define GAME_LOGIC_H
 
 #include "asm_interface.h"
