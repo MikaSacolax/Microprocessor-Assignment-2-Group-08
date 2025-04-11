@@ -1,13 +1,13 @@
+#include "display_utils.h"
+#include "game_logic.h"
+#include "morse_utils.h"
 #include <hardware/sync.h>
 #include <hardware/timer.h>
+#include <hardware/watchdog.h>
 #include <pico/stdio.h>
 #include <pico/time.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "display_utils.h"
-#include "game_logic.h"
-#include "morse_utils.h"
 
 void main_asm();
 
@@ -20,6 +20,9 @@ int main() {
   sleep_ms(5000); // time to allow serial monitor connection
 
   main_asm();
+
+  // pico sdk docs say 8388 is the max
+  watchdog_enable(8388, 1);
 
   GameContext game_context;
   initialize_game_context(&game_context);
@@ -88,12 +91,14 @@ void main_menu(GameContext *context) {
       char last_char = '\0';
 
       if (asm_interface_has_new_char()) {
+        watchdog_update();
         asm_interface_clear_new_char_flag();
         if (!asm_interface_check_and_clear_initial_space()) {
           last_char = asm_interface_get_last_char();
         }
       }
       if (asm_interface_is_sequence_complete()) {
+        watchdog_update();
         asm_interface_clear_sequence_complete_flag();
         sequence_complete = true;
       }
@@ -124,12 +129,14 @@ void main_menu(GameContext *context) {
     if (selected_level_index != -1) {
       printf("\nSelected Level %d ('%s'). Starting game!\n",
              selected_level_index + 1, level_select_buffer);
+      watchdog_update();
       busy_wait_ms(1500);
       context->current_level_index = selected_level_index;
       context->current_state = GAME_STATE_START_LEVEL;
     } else {
       printf("\nInvalid level selection ('%s' -> '%c'). Please try again.\n",
              level_select_buffer, decoded_char ? decoded_char : ' ');
+      watchdog_update();
       busy_wait_ms(1000);
       printf("\n");
     }

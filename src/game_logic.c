@@ -3,6 +3,7 @@
 #include "display_utils.h"
 #include "morse_utils.h"
 #include <hardware/sync.h>
+#include <hardware/watchdog.h>
 #include <pico/time.h>
 #include <stdio.h>
 #include <string.h>
@@ -105,6 +106,7 @@ void handle_waiting_input(GameContext *context) {
   bool state_changed = false;
 
   if (asm_interface_has_new_char()) {
+    watchdog_update();
     asm_interface_clear_new_char_flag();
 
     bool initial_space_cleared = asm_interface_check_and_clear_initial_space();
@@ -116,6 +118,7 @@ void handle_waiting_input(GameContext *context) {
   }
 
   if (asm_interface_is_sequence_complete()) {
+    watchdog_update();
     asm_interface_clear_sequence_complete_flag();
     context->current_state = GAME_STATE_CHECK_ANSWER;
     state_changed = true;
@@ -127,16 +130,20 @@ void handle_waiting_input(GameContext *context) {
 }
 
 void handle_check_answer(GameContext *context) {
+  watchdog_update();
   check_answer(context);
   context->current_state = GAME_STATE_SHOW_RESULT;
 }
 
 void handle_show_result(GameContext *context) {
+  watchdog_update();
   char final_input_morse[MORSE_BUFFER_SIZE];
   asm_interface_get_morse_input(final_input_morse, MORSE_BUFFER_SIZE);
 
   display_result_screen(context, final_input_morse, RESULT_DISPLAY_MS / 1000);
   busy_wait_ms(RESULT_DISPLAY_MS);
+
+  watchdog_update();
 
   if (context->current_lives <= 0) {
     context->current_state = GAME_STATE_GAME_OVER;
@@ -149,6 +156,7 @@ void handle_show_result(GameContext *context) {
 }
 
 void handle_level_complete(GameContext *context) {
+  watchdog_update();
   clear_screen();
   // clang-format off
   printf("=======================================================================\n");
@@ -161,6 +169,7 @@ void handle_level_complete(GameContext *context) {
   if (context->current_level_index < MAX_LEVEL_INDEX) {
     printf("Advancing to next level...\n");
     busy_wait_ms(2500);
+    watchdog_update();
     context->current_level_index++;
     context->current_state = GAME_STATE_START_LEVEL;
   } else {
@@ -170,6 +179,7 @@ void handle_level_complete(GameContext *context) {
 }
 
 void handle_game_over(GameContext *context) {
+  watchdog_update();
   clear_screen();
   // clang-format off
   printf("=======================================================================\n");
@@ -180,11 +190,13 @@ void handle_game_over(GameContext *context) {
   // clang-format on
   fflush(stdout);
   busy_wait_ms(4000);
+  watchdog_update();
   context->current_state = GAME_STATE_MAIN_MENU;
   initialize_game_context(context);
 }
 
 void handle_game_complete(GameContext *context) {
+  watchdog_update();
   clear_screen();
 
   // clang-format off
@@ -196,6 +208,7 @@ void handle_game_complete(GameContext *context) {
   // clang-format on
   fflush(stdout);
   busy_wait_ms(4000);
+  watchdog_update();
   context->current_state = GAME_STATE_MAIN_MENU;
   initialize_game_context(context);
 }
