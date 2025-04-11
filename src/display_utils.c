@@ -121,6 +121,8 @@ void display_result_screen(const GameContext *context, const char *final_input,
   printf("\t\tResult: %s\n",
          context->last_answer_correct ? "CORRECT!" : "INCORRECT!");
   printf("\n");
+  printf("\t\tTime Taken:       %.2f seconds\n",
+         (float)context->last_challenge_duration_ms / 1000.0f);
 
   printf("\t\tCurrent Correct Streak: %d/%d\n",
          context->correct_challenges_this_level, ROUNDS_PER_LEVEL);

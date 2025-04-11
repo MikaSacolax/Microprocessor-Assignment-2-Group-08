@@ -4,6 +4,7 @@
 #include "morse_utils.h"
 #include "ws2812.h"
 #include <hardware/sync.h>
+#include <hardware/timer.h>
 #include <hardware/watchdog.h>
 #include <pico/time.h>
 #include <stdio.h>
@@ -124,6 +125,7 @@ void handle_present_challenge(GameContext *context) {
   update_and_display_player_input(context,
                                   true); // pass true for "waiting for input"
   context->current_state = GAME_STATE_WAITING_INPUT;
+  context->challenge_start_time_us = time_us_64();
 }
 
 void handle_waiting_input(GameContext *context) {
@@ -158,6 +160,10 @@ void handle_check_answer(GameContext *context) {
   check_answer(context);
   set_led_color_by_lives(context->current_lives);
   context->current_state = GAME_STATE_SHOW_RESULT;
+  uint64_t challenge_end_time_us = time_us_64();
+  context->last_challenge_duration_ms =
+      (uint32_t)((challenge_end_time_us - context->challenge_start_time_us) /
+                 1000);
 }
 
 void handle_show_result(GameContext *context) {
