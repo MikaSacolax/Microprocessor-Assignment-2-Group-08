@@ -65,10 +65,10 @@ void display_challenge_screen(const GameContext *context,
                               const char *current_input,
                               const char *decoded_input, bool is_waiting) {
   clear_screen();
-  printf("======================= Level %d: Streak %d/%d "
-         "========================\n\n",
+  printf("================== Level %d: Correct Streak %d/%d "
+         "==================\n\n",
          context->current_config.level_number,
-         context->challenges_attempted_this_level + 1, ROUNDS_PER_LEVEL);
+         context->correct_challenges_this_level, ROUNDS_PER_LEVEL);
 
   draw_hearts(context->current_lives);
   printf("\n");
@@ -120,6 +120,10 @@ void display_result_screen(const GameContext *context, const char *final_input,
   printf("\n");
   printf("\t\tResult: %s\n",
          context->last_answer_correct ? "CORRECT!" : "INCORRECT!");
+  printf("\n");
+
+  printf("\t\tCurrent Correct Streak: %d/%d\n",
+         context->correct_challenges_this_level, ROUNDS_PER_LEVEL);
   printf("\n");
 
   if (countdown_secs > 0) {

@@ -156,6 +156,7 @@ void handle_waiting_input(GameContext *context) {
 void handle_check_answer(GameContext *context) {
   watchdog_update();
   check_answer(context);
+  set_led_color_by_lives(context->current_lives);
   context->current_state = GAME_STATE_SHOW_RESULT;
 }
 
@@ -171,7 +172,7 @@ void handle_show_result(GameContext *context) {
 
   if (context->current_lives <= 0) {
     context->current_state = GAME_STATE_GAME_OVER;
-  } else if (context->challenges_attempted_this_level >= ROUNDS_PER_LEVEL) {
+  } else if (context->correct_challenges_this_level >= ROUNDS_PER_LEVEL) {
     context->current_state = GAME_STATE_LEVEL_COMPLETE;
   } else {
     generate_challenge(context);
@@ -185,7 +186,6 @@ void handle_level_complete(GameContext *context) {
   // clang-format off
   printf("=======================================================================\n");
   printf("                         Level %d Complete!\n", context->current_config.level_number);
-  printf("                      You got %d / %d correct!\n", context->correct_challenges_this_level, ROUNDS_PER_LEVEL);
   printf("                    You finished with %d lives left.\n", context->current_lives);
   printf("=======================================================================\n\n");
   // clang-format on
