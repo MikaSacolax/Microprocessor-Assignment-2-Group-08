@@ -2,6 +2,7 @@
 #define GAME_LOGIC_H
 
 #include "asm_interface.h"
+#include "ws2812.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -47,7 +48,7 @@ typedef struct GameContext {
 } GameContext;
 
 typedef enum { LED_OFF, LED_RED, LED_ORANGE, LED_GREEN, LED_BLUE } LedColor;
-// void set_rgb_led(LedColor color);
+void set_led_color_by_lives(int lives);
 
 // game setup functions
 void initialize_game_context(GameContext *context);

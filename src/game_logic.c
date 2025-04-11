@@ -2,6 +2,7 @@
 #include "asm_interface.h"
 #include "display_utils.h"
 #include "morse_utils.h"
+#include "ws2812.h"
 #include <hardware/sync.h>
 #include <hardware/watchdog.h>
 #include <pico/time.h>
@@ -22,6 +23,27 @@ void initialize_game_context(GameContext *context) {
   context->current_state = GAME_STATE_MAIN_MENU;
   context->current_level_index = 0;
   context->current_lives = MAX_LIVES;
+  put_pixel(BLUE);
+}
+
+void set_led_color_by_lives(int lives) {
+  switch (lives) {
+  case 3:
+    put_pixel(GREEN);
+    break;
+  case 2:
+    put_pixel(YELLOW);
+    break;
+  case 1:
+    put_pixel(ORANGE);
+    break;
+  case 0:
+    put_pixel(RED);
+    break;
+  default:
+    put_pixel(BLUE);
+    break;
+  }
 }
 
 void setup_level(GameContext *context, int level_index) {
@@ -31,6 +53,7 @@ void setup_level(GameContext *context, int level_index) {
 
   context->challenges_attempted_this_level = 0;
   context->correct_challenges_this_level = 0;
+  set_led_color_by_lives(context->current_lives);
 }
 
 void generate_challenge(GameContext *context) {
@@ -39,6 +62,7 @@ void generate_challenge(GameContext *context) {
                 MORSE_BUFFER_SIZE);
   context->target_morse = context->target_morse_buffer;
   context->last_input_decoded[0] = '\0';
+  set_led_color_by_lives(context->current_lives);
 }
 
 // check the player's answer against the target
@@ -175,10 +199,12 @@ void handle_level_complete(GameContext *context) {
   } else {
     context->current_state = GAME_STATE_GAME_COMPLETE;
   }
+  put_pixel(BLUE);
   fflush(stdout);
 }
 
 void handle_game_over(GameContext *context) {
+  put_pixel(RED);
   watchdog_update();
   clear_screen();
   // clang-format off
@@ -198,6 +224,7 @@ void handle_game_over(GameContext *context) {
 void handle_game_complete(GameContext *context) {
   watchdog_update();
   clear_screen();
+  put_pixel(BLUE);
 
   // clang-format off
   printf("***********************************************************************\n");

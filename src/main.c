@@ -30,7 +30,6 @@ int main() {
 #define WS2812_PIN_MAIN 28
 #define IS_RGBW_MAIN true
   ws2812_program_init(pio, sm, offset, WS2812_PIN_MAIN, 800000, IS_RGBW_MAIN);
-  put_pixel(GREEN);
 
   // pico sdk docs say 8388 is the max
   watchdog_enable(8388, 1);
