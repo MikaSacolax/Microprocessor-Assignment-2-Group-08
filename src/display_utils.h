@@ -7,6 +7,7 @@ typedef struct GameContext GameContext; // forward declaration
 
 void print_main_menu();
 void clear_screen();
+void draw_hearts(int lives);
 void centre_display();
 
 // displays main challenge screen including target, hint (if on), current player
