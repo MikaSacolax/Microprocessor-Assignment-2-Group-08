@@ -32,11 +32,16 @@ void print_main_menu() {
 
     busy_wait_ms(3000);
     clear_screen();
-    printf("USE GP21 BUTTON TO ENTER THE MORSE SEQUENCE FOR THE LEVEL NUMBER\n\n");
-    printf("          .----  LEVEL 1  (Chars - Hint On)\n");
-    printf("          ..---  LEVEL 2  (Chars - Hint Off)\n");
-    printf("          ...--  LEVEL 3  (Words - Hint On)\n");
-    printf("          ....-  LEVEL 4  (Words - Hint Off)\n");
+    printf("         Press quickly for dot and more than 0.3 seconds for dash.\n");
+    printf("            Don't press anything for 1 second to enter a space.\n");
+    printf("             Wait for 2 seconds when done to end your input.\n");
+    printf("You will be graded on your speed and three incorrect guesses before game over. Good luck!\n");
+    printf("      USE GP21 BUTTON TO ENTER THE MORSE SEQUENCE FOR THE LEVEL NUMBER\n\n");
+
+    printf("            .----  LEVEL 1  (Chars - Hint On)\n");
+    printf("            ..---  LEVEL 2  (Chars - Hint Off)\n");
+    printf("            ...--  LEVEL 3  (Words - Hint On)\n");
+    printf("            ....-  LEVEL 4  (Words - Hint Off)\n");
     printf("\n");
 }
 // clang-format on
