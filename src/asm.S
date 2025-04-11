@@ -33,10 +33,10 @@ main_asm:
 
     pop     {pc}
 
+/**
+    @brief: Function that handles installing the alarm interrupt in the vector table
+*/
 install_alarm_isrs:
-    /**
-        @brief: Function that handles installing the alarm interrupt in the vector table
-     */
     ldr     r0, =(PPB_BASE + M0PLUS_VTOR_OFFSET)
     ldr     r1, [r0]                                           @ load the vector table base address into r1
 
@@ -57,10 +57,10 @@ install_alarm_isrs:
 
     bx     lr                                                  @ Return back after function has completed.
 
+/**
+    @brief: This function handles installing the gpio interrupt
+*/
 install_gpio_isr:
-    /**
-        @brief: This function handles installing the gpio interrupt
-     */
     ldr     r0, =(PPB_BASE + M0PLUS_VTOR_OFFSET)               @ Get RAM Vector Table offset
     ldr     r1, [r0]                                           @ copy Table address in register r1
     ldr     r0, = gpio_isr                                     @ Get the action done by gpio pin 21
@@ -77,9 +77,9 @@ install_gpio_isr:
     // Exit subroutine  
     bx      lr                                                 @ Return back after completing.
 
-    /**
-        @brief: This function should enable the buttons on RP2040
-     */
+/**
+    @brief: This function should enable the buttons on RP2040
+*/
 btns_init:
     push    {lr}                                               @ Save link register to stack
     movs    r0, #GPIO_BTN                                      @ load gpio pin in register r0
