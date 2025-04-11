@@ -36,10 +36,12 @@ pico_sdk_init()
 
 add_executable(Assignment_2 src/main.c src/asm.S src/morse_utils.h src/morse_utils.c src/display_utils.h 
                             src/display_utils.c src/game_logic.c src/game_logic.h src/sdk_asm_helpers.c
-                            src/sdk_asm_helpers.h src/asm_interface.h src/asm_interface.c)
+                            src/sdk_asm_helpers.h src/asm_interface.h src/asm_interface.c src/ws2812.c
+                            src/ws2812.h)
 
 pico_set_program_name(Assignment_2 "Assignment_2")
 pico_set_program_version(Assignment_2 "0.1")
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/ws2812.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(Assignment_2 1)

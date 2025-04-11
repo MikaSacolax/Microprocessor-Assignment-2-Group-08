@@ -1,6 +1,9 @@
 #include "display_utils.h"
 #include "game_logic.h"
+#include "hardware/pio.h"
 #include "morse_utils.h"
+#include "ws2812.h"
+#include "ws2812.pio.h"
 #include <hardware/sync.h>
 #include <hardware/timer.h>
 #include <hardware/watchdog.h>
@@ -20,6 +23,14 @@ int main() {
   sleep_ms(5000); // time to allow serial monitor connection
 
   main_asm();
+
+  PIO pio = pio0;
+  uint sm = 0;
+  uint offset = pio_add_program(pio, &ws2812_program);
+#define WS2812_PIN_MAIN 28
+#define IS_RGBW_MAIN true
+  ws2812_program_init(pio, sm, offset, WS2812_PIN_MAIN, 800000, IS_RGBW_MAIN);
+  put_pixel(GREEN);
 
   // pico sdk docs say 8388 is the max
   watchdog_enable(8388, 1);
