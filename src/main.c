@@ -19,6 +19,11 @@
 void main_asm();
 
 // function declarations
+/**
+ * @brief Responsible for handling and calling all functions required for the start screen and level selection.
+ * 
+ * @param context 
+ */
 void main_menu(GameContext *context);
 
 int main() {
