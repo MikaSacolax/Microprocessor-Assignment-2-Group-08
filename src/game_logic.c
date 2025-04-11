@@ -1,125 +1,241 @@
 #include "game_logic.h"
+#include "asm_interface.h"
 #include "display_utils.h"
 #include "morse_utils.h"
+#include "ws2812.h"
 #include <hardware/sync.h>
+#include <hardware/watchdog.h>
 #include <pico/time.h>
 #include <stdio.h>
 #include <string.h>
 
 const LevelConfig level_configs[] = {
     {.level_number = 1, .show_morse_hint = true},
-    {.level_number = 2, .show_morse_hint = false}};
+    {.level_number = 2, .show_morse_hint = false},
+    {.level_number = 3, .show_morse_hint = true},
+    {.level_number = 4, .show_morse_hint = false}};
+
+const uint32_t NUM_LEVELS = sizeof(level_configs) / sizeof(level_configs[0]);
+const uint32_t MAX_LEVEL_INDEX = NUM_LEVELS - 1;
+
+void initialize_game_context(GameContext *context) {
+  memset(context, 0, sizeof(GameContext));
+  context->current_state = GAME_STATE_MAIN_MENU;
+  context->current_level_index = 0;
+  context->current_lives = MAX_LIVES;
+  put_pixel(BLUE);
+}
+
+void set_led_color_by_lives(int lives) {
+  switch (lives) {
+  case 3:
+    put_pixel(GREEN);
+    break;
+  case 2:
+    put_pixel(YELLOW);
+    break;
+  case 1:
+    put_pixel(ORANGE);
+    break;
+  case 0:
+    put_pixel(RED);
+    break;
+  default:
+    put_pixel(BLUE);
+    break;
+  }
+}
 
 void setup_level(GameContext *context, int level_index) {
   context->current_level_index = level_index;
   context->current_config = level_configs[level_index];
   context->current_state = GAME_STATE_PRESENT_CHALLENGE;
-  generate_challenge(context);
+
+  context->challenges_attempted_this_level = 0;
+  context->correct_challenges_this_level = 0;
+  set_led_color_by_lives(context->current_lives);
 }
 
 void generate_challenge(GameContext *context) {
-  context->target_char = rand_char();
-  context->target_morse = to_morse(context->target_char);
-  while (strlen(context->target_morse) == 0) {
-    context->target_char = rand_char();
-    context->target_morse = to_morse(context->target_char);
-  }
+  context->target_challenge = rand_challenge(context);
+  word_to_morse(context->target_challenge, context->target_morse_buffer,
+                MORSE_BUFFER_SIZE);
+  context->target_morse = context->target_morse_buffer;
+  context->last_input_decoded[0] = '\0';
+  set_led_color_by_lives(context->current_lives);
 }
 
-void display_challenge(const GameContext *context) {
-  clear_screen();
-  printf(
-      "============================================================== Level %d "
-      "==============================================================\n\n",
-      context->current_config.level_number);
-  printf("\t\t\t\t\t\t\tTarget Character:  %c\n", context->target_char);
-
-  if (context->current_config.show_morse_hint) {
-    printf("\t\t\t\t\t\t\tMorse Code Hint:   %s\n", context->target_morse);
-  }
-
-  printf("\n\t\t\t\t\t\t\tYour Input Morse:  []\n");
-  printf("\t\t\t\t\t\t\tDecodes To:        []\n");
-
-  printf("\t\t\t\t\t\t\tWaiting for your input...\n");
-  centre_display();
-}
-
-void display_player_input(const GameContext *context) {
-  uint32_t current_len;
-  char decoded_char = '?';
-
-  uint32_t ints = save_and_disable_interrupts();
-  current_len = current;
-  restore_interrupts_from_disabled(ints);
-
-  // safe read
-  if (current_len >= MORSE_BUFFER_SIZE) {
-    current_len = MORSE_BUFFER_SIZE - 1;
-    decoded_char = '?';
-
-    printf("\t\t\t\t\t\t\tWarning - overflow.\n");
-  } else {
-    if (current_len > 0) {
-      decoded_char =
-          from_morse_len((const char *)morse_code_buffer, current_len);
-    } else {
-      decoded_char = ' ';
-    }
-  }
-
-  // make it look non-scrolling
-  clear_screen();
-  printf(
-      "============================================================== Level %d "
-      "==============================================================\n\n",
-      context->current_config.level_number);
-  printf("\t\t\t\t\t\t\tTarget Character:  %c\n", context->target_char);
-  if (context->current_config.show_morse_hint) {
-    printf("\t\t\t\t\t\t\tMorse Code Hint:   %s\n", context->target_morse);
-  }
-
-  printf("\n\t\t\t\t\t\t\tYour Input Morse:  [");
-
-  for (uint32_t i = 0; i < current_len; ++i) {
-    putchar(morse_code_buffer[i]);
-  }
-  printf("]\n");
-
-  printf("\t\t\t\t\t\t\tDecodes To:        [%c]\n", decoded_char);
-  printf("\n\t\t\t\t\t\t\tInputting...\n");
-  centre_display();
-}
-
-// use after sequence complete flag is set (since the buffer will be null
-// terminated)
+// check the player's answer against the target
 bool check_answer(GameContext *context) {
-  bool is_correct =
-      (strcmp((const char *)morse_code_buffer, context->target_morse) == 0);
+  char final_input_morse[MORSE_BUFFER_SIZE];
+  asm_interface_get_morse_input(final_input_morse, MORSE_BUFFER_SIZE);
 
+  bool is_correct = (strcmp(final_input_morse, context->target_morse) == 0);
   context->last_answer_correct = is_correct;
-  context->last_input_decoded = from_morse((const char *)morse_code_buffer);
+
+  decode_morse_word(final_input_morse, context->last_input_decoded,
+                    MORSE_BUFFER_SIZE);
+
+  context->challenges_attempted_this_level++;
+  if (is_correct) {
+    context->correct_challenges_this_level++;
+  } else {
+    context->current_lives--;
+    context->correct_challenges_this_level = 0;
+  }
 
   return is_correct;
 }
 
-void display_result(const GameContext *context) {
+void update_and_display_player_input(GameContext *context, bool is_waiting) {
+  char current_input_morse[MORSE_BUFFER_SIZE];
+  char decoded_input_buffer[MORSE_BUFFER_SIZE];
+
+  size_t current_len =
+      asm_interface_get_morse_input(current_input_morse, MORSE_BUFFER_SIZE);
+
+  // protect against buffer overflow
+  if (current_len >= MORSE_BUFFER_SIZE - 1) {
+    printf("Warning - input buffer full.\n");
+    decoded_input_buffer[0] = '?';
+    decoded_input_buffer[1] = '\0';
+  } else if (current_len > 0) {
+    decode_morse_word(current_input_morse, decoded_input_buffer,
+                      MORSE_BUFFER_SIZE);
+  } else {
+    // if buffer is empty
+    decoded_input_buffer[0] = '\0';
+  }
+
+  display_challenge_screen(context, current_input_morse, decoded_input_buffer,
+                           is_waiting);
+}
+
+/// state handlers ////
+
+void handle_start_level(GameContext *context) {
+  setup_level(context, context->current_level_index);
+  generate_challenge(context);
+  context->current_state = GAME_STATE_PRESENT_CHALLENGE;
+}
+
+void handle_present_challenge(GameContext *context) {
+  asm_interface_flush_state();
+  update_and_display_player_input(context,
+                                  true); // pass true for "waiting for input"
+  context->current_state = GAME_STATE_WAITING_INPUT;
+}
+
+void handle_waiting_input(GameContext *context) {
+  bool state_changed = false;
+
+  if (asm_interface_has_new_char()) {
+    watchdog_update();
+    asm_interface_clear_new_char_flag();
+
+    bool initial_space_cleared = asm_interface_check_and_clear_initial_space();
+
+    if (!initial_space_cleared) {
+      update_and_display_player_input(context,
+                                      false); // false for "inputting.."
+    }
+  }
+
+  if (asm_interface_is_sequence_complete()) {
+    watchdog_update();
+    asm_interface_clear_sequence_complete_flag();
+    context->current_state = GAME_STATE_CHECK_ANSWER;
+    state_changed = true;
+  }
+
+  if (!state_changed) {
+    busy_wait_us(500);
+  }
+}
+
+void handle_check_answer(GameContext *context) {
+  watchdog_update();
+  check_answer(context);
+  set_led_color_by_lives(context->current_lives);
+  context->current_state = GAME_STATE_SHOW_RESULT;
+}
+
+void handle_show_result(GameContext *context) {
+  watchdog_update();
+  char final_input_morse[MORSE_BUFFER_SIZE];
+  asm_interface_get_morse_input(final_input_morse, MORSE_BUFFER_SIZE);
+
+  display_result_screen(context, final_input_morse, RESULT_DISPLAY_MS / 1000);
+  busy_wait_ms(RESULT_DISPLAY_MS);
+
+  watchdog_update();
+
+  if (context->current_lives <= 0) {
+    context->current_state = GAME_STATE_GAME_OVER;
+  } else if (context->correct_challenges_this_level >= ROUNDS_PER_LEVEL) {
+    context->current_state = GAME_STATE_LEVEL_COMPLETE;
+  } else {
+    generate_challenge(context);
+    context->current_state = GAME_STATE_PRESENT_CHALLENGE;
+  }
+}
+
+void handle_level_complete(GameContext *context) {
+  watchdog_update();
   clear_screen();
-  printf("============================================================== Level "
-         "%d Result "
-         "==============================================================\n\n",
-         context->current_config.level_number);
+  // clang-format off
+  printf("=======================================================================\n");
+  printf("                         Level %d Complete!\n", context->current_config.level_number);
+  printf("                    You finished with %d lives left.\n", context->current_lives);
+  printf("=======================================================================\n\n");
+  // clang-format on
 
-  printf("\t\t\t\t\t\t\tTarget Character: %c (%s)\n", context->target_char,
-         context->target_morse);
+  if (context->current_level_index < MAX_LEVEL_INDEX) {
+    printf("Advancing to next level...\n");
+    busy_wait_ms(2500);
+    watchdog_update();
+    context->current_level_index++;
+    context->current_state = GAME_STATE_START_LEVEL;
+  } else {
+    context->current_state = GAME_STATE_GAME_COMPLETE;
+  }
+  put_pixel(BLUE);
+  fflush(stdout);
+}
 
-  printf("\t\t\t\t\t\t\tYour Input:       %s -> %c\n",
-         (const char *)morse_code_buffer, context->last_input_decoded);
+void handle_game_over(GameContext *context) {
+  put_pixel(RED);
+  watchdog_update();
+  clear_screen();
+  // clang-format off
+  printf("=======================================================================\n");
+  printf("                              GAME OVER\n");
+  printf("                       You ran out of lives!\n");
+  printf("=======================================================================\n\n");
+  printf("                      Returning to Main Menu...\n");
+  // clang-format on
+  fflush(stdout);
+  busy_wait_ms(4000);
+  watchdog_update();
+  context->current_state = GAME_STATE_MAIN_MENU;
+  initialize_game_context(context);
+}
 
-  printf("\t\t\t\t\t\t\tResult: %s\n",
-         context->last_answer_correct ? "CORRECT!" : "INCORRECT!");
+void handle_game_complete(GameContext *context) {
+  watchdog_update();
+  clear_screen();
+  put_pixel(BLUE);
 
-  printf("\n\t\t\t\t\t\t\tNext challenge in %d seconds...\n", 3);
-  centre_display();
-  busy_wait_ms(3000);
+  // clang-format off
+  printf("***********************************************************************\n");
+  printf("                          CONGRATULATIONS!\n");
+  printf("                       You have won the game!\n");
+  printf("***********************************************************************\n\n");
+  printf("                     Returning to Main Menu...\n");
+  // clang-format on
+  fflush(stdout);
+  busy_wait_ms(4000);
+  watchdog_update();
+  context->current_state = GAME_STATE_MAIN_MENU;
+  initialize_game_context(context);
 }
