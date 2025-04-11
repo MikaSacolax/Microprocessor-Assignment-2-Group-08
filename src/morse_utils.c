@@ -153,3 +153,31 @@ const char *rand_challenge(GameContext *context) {
     return word_list[num];
   }
 }
+
+uint32_t calculate_ideal_time_ms(const char *morse_string) {
+  if (!morse_string) {
+    return 0;
+  }
+
+  uint32_t ideal_time = 0;
+
+  for (size_t i = 0; morse_string[i] != '\0'; i++) {
+    switch (morse_string[i]) {
+    case '.':
+      ideal_time += 100; // 0.1 seconds
+      break;
+    case '-':
+      ideal_time += 300; // 0.3 seconds
+      break;
+    case ' ':
+      ideal_time += 1000; // 1 second for space between characters
+      break;
+    default:
+      break;
+    }
+  }
+
+  ideal_time += 2000; // always add 2 seconds for end of sequence
+
+  return ideal_time;
+}

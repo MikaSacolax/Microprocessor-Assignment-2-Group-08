@@ -4,6 +4,7 @@
 #include "morse_utils.h"
 #include "ws2812.h"
 #include <hardware/sync.h>
+#include <hardware/timer.h>
 #include <hardware/watchdog.h>
 #include <pico/time.h>
 #include <stdio.h>
@@ -23,6 +24,8 @@ void initialize_game_context(GameContext *context) {
   context->current_state = GAME_STATE_MAIN_MENU;
   context->current_level_index = 0;
   context->current_lives = MAX_LIVES;
+  context->ideal_time_ms = 0;
+  context->last_score_percentage = 0;
   put_pixel(BLUE);
 }
 
@@ -62,6 +65,7 @@ void generate_challenge(GameContext *context) {
                 MORSE_BUFFER_SIZE);
   context->target_morse = context->target_morse_buffer;
   context->last_input_decoded[0] = '\0';
+  context->ideal_time_ms = calculate_ideal_time_ms(context->target_morse);
   set_led_color_by_lives(context->current_lives);
 }
 
@@ -124,6 +128,7 @@ void handle_present_challenge(GameContext *context) {
   update_and_display_player_input(context,
                                   true); // pass true for "waiting for input"
   context->current_state = GAME_STATE_WAITING_INPUT;
+  context->challenge_start_time_us = time_us_64();
 }
 
 void handle_waiting_input(GameContext *context) {
@@ -158,6 +163,20 @@ void handle_check_answer(GameContext *context) {
   check_answer(context);
   set_led_color_by_lives(context->current_lives);
   context->current_state = GAME_STATE_SHOW_RESULT;
+  uint64_t challenge_end_time_us = time_us_64();
+  context->last_challenge_duration_ms =
+      (uint32_t)((challenge_end_time_us - context->challenge_start_time_us) /
+                 1000);
+
+  if (context->last_challenge_duration_ms > 0) {
+    // (ideal / actual) * 100
+    // Use 64-bits to stop overflow before division
+    uint64_t ideal_x_100 = (uint64_t)context->ideal_time_ms * 100;
+    context->last_score_percentage =
+        (uint32_t)(ideal_x_100 / context->last_challenge_duration_ms);
+  } else {
+    context->last_score_percentage = 0; // avoid div by zero
+  }
 }
 
 void handle_show_result(GameContext *context) {

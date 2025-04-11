@@ -32,11 +32,16 @@ void print_main_menu() {
 
     busy_wait_ms(3000);
     clear_screen();
-    printf("USE GP21 BUTTON TO ENTER THE MORSE SEQUENCE FOR THE LEVEL NUMBER\n\n");
-    printf("          .----  LEVEL 1  (Chars - Hint On)\n");
-    printf("          ..---  LEVEL 2  (Chars - Hint Off)\n");
-    printf("          ...--  LEVEL 3  (Words - Hint On)\n");
-    printf("          ....-  LEVEL 4  (Words - Hint Off)\n");
+    printf("         Press quickly for dot and more than 0.3 seconds for dash.\n");
+    printf("            Don't press anything for 1 second to enter a space.\n");
+    printf("             Wait for 2 seconds when done to end your input.\n");
+    printf("You will be graded on your speed and three incorrect guesses before game over. Good luck!\n");
+    printf("      USE GP21 BUTTON TO ENTER THE MORSE SEQUENCE FOR THE LEVEL NUMBER\n\n");
+
+    printf("            .----  LEVEL 1  (Chars - Hint On)\n");
+    printf("            ..---  LEVEL 2  (Chars - Hint Off)\n");
+    printf("            ...--  LEVEL 3  (Words - Hint On)\n");
+    printf("            ....-  LEVEL 4  (Words - Hint Off)\n");
     printf("\n");
 }
 // clang-format on
@@ -121,7 +126,11 @@ void display_result_screen(const GameContext *context, const char *final_input,
   printf("\t\tResult: %s\n",
          context->last_answer_correct ? "CORRECT!" : "INCORRECT!");
   printf("\n");
-
+  printf("\t\tTime Taken:       %.2f seconds\n",
+         (float)context->last_challenge_duration_ms / 1000.0f);
+  printf("\t\tIdeal Time:      %.2f seconds\n",
+         (float)context->ideal_time_ms / 1000.0f);
+  printf("\t\tSpeed Score:  %u%%\n", context->last_score_percentage);
   printf("\t\tCurrent Correct Streak: %d/%d\n",
          context->correct_challenges_this_level, ROUNDS_PER_LEVEL);
   printf("\n");
